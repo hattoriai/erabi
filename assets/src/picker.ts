@@ -767,7 +767,7 @@ export class Picker {
       const avatar = el("span", { class: "erabi-avatar", "data-kind": o.person ?? "human", "aria-hidden": "true" });
       if (o.color) avatar.style.setProperty("--erabi-avatar-color", paletteColor(o.color));
       if (o.avatar) avatar.append(el("img", { src: o.avatar, alt: "", loading: "lazy" }));
-      else avatar.append(initials(o.label));
+      else avatar.append(el("span", { class: "erabi-initials" }, initials(o.label)));
       return [avatar];
     }
     if (o.icon && this.config.icons) {
@@ -900,7 +900,7 @@ export class Picker {
     const mark = el("span", { class: "erabi-avatar erabi-peer", "data-kind": peer.kind, title: peer.name });
     mark.style.setProperty("--erabi-avatar-color", peer.color);
     if (peer.avatar) mark.append(el("img", { src: peer.avatar, alt: "" }));
-    else mark.append(initials(peer.name));
+    else mark.append(el("span", { class: "erabi-initials" }, initials(peer.name)));
     return mark;
   }
 
