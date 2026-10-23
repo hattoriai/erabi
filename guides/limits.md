@@ -17,4 +17,3 @@ What Erabi does not do yet. Each is a good first issue to open.
 * **Scripts without spaces.** Matching finds words by spaces and
   punctuation; Japanese and Chinese names match by their letters in
   order, not by words.
-* **Collaboration.** A shared picker (with Issho) is to come.

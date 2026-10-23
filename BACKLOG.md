@@ -50,8 +50,3 @@ would keep one copy.
 
 `Intl.Segmenter` for words in Japanese and Chinese names, as Jumon's
 backlog has it.
-
-## Collaboration
-
-A picker bound to Issho's shared state (Issho 0.4): a page property that
-people and agents change together, with the others' presence on it.
