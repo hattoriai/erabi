@@ -46,7 +46,7 @@ export default defineConfig({
   webServer: {
     command: "mix do erabi.build + dev",
     cwd: "..",
-    url: `${baseURL}/days`,
+    url: `${baseURL}/plain`,
     env: { PORT: String(port), ERABI_DEV_WATCH: "false", MIX_ENV: "dev" },
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,

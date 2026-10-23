@@ -1,0 +1,636 @@
+/*
+ * Erabi picker styles.
+ *
+ * Every colour, space, radius and font comes from an --erabi-* custom
+ * property. Set them on .erabi (or higher) to theme the pickers, or load
+ * erabi-sumi.css to map them to the Sumi tokens. The defaults below have
+ * no specificity, so a value set on :root, on an ancestor or on .erabi
+ * itself wins. They are Kotoba's, Koyomi's and Jumon's own defaults, so
+ * that a page with them looks like one thing.
+ *
+ * The defaults are light, and dark under data-theme="dark" (the attribute
+ * of Phoenix's themes) or the class "dark".
+ *
+ * The option colours are pairs of a chip's background and text, each pair
+ * at least 6.8:1 in light and 8.8:1 in dark (WCAG AAA).
+ */
+
+:where(:root) {
+  --erabi-font: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --erabi-font-size: 0.9375rem;
+  --erabi-small: 0.8125rem;
+  --erabi-line-height: 1.4;
+  --erabi-text: #1f1f23;
+  --erabi-muted: #6b6b76;
+  --erabi-background: #ffffff;
+  --erabi-surface: #f6f6f7;
+  --erabi-border: #d9d9de;
+  --erabi-border-hover: #b9b9c2;
+  --erabi-accent: #2f5bd3;
+  --erabi-accent-text: #ffffff;
+  --erabi-invalid: color-mix(in oklab, #c62828 85%, var(--erabi-text));
+  --erabi-active: color-mix(in oklab, var(--erabi-text) 6%, var(--erabi-background));
+  --erabi-match: var(--erabi-accent);
+  --erabi-radius: 8px;
+  --erabi-inner-radius: 6px;
+  --erabi-chip-radius: 6px;
+  --erabi-field-height: 2.375rem;
+  --erabi-row-height: 2.25rem;
+  --erabi-space: 0.5rem;
+  --erabi-icon-size: 16px;
+  --erabi-avatar-size: 1.375rem;
+  --erabi-agent-radius: 30%;
+  --erabi-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  --erabi-transition: 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --erabi-focus-ring: 0 0 0 2px var(--erabi-background), 0 0 0 4px var(--erabi-accent);
+
+  --erabi-gray-surface: #e9ebee;
+  --erabi-gray-text: #494d54;
+  --erabi-brown-surface: #f7e8de;
+  --erabi-brown-text: #66442c;
+  --erabi-orange-surface: #ffe3cf;
+  --erabi-orange-text: #852c00;
+  --erabi-yellow-surface: #f8eac9;
+  --erabi-yellow-text: #6a4600;
+  --erabi-green-surface: #d8f4dd;
+  --erabi-green-text: #005e26;
+  --erabi-blue-surface: #d7edff;
+  --erabi-blue-text: #0b4c92;
+  --erabi-purple-surface: #f3e4ff;
+  --erabi-purple-text: #5f3389;
+  --erabi-pink-surface: #ffdfef;
+  --erabi-pink-text: #7e2757;
+  --erabi-red-surface: #ffdeda;
+  --erabi-red-text: #8d1a1e;
+}
+
+:where([data-theme="dark"], .dark) {
+  --erabi-text: #ececf1;
+  --erabi-muted: #9a9aa6;
+  --erabi-background: #1b1b1f;
+  --erabi-surface: #26262c;
+  --erabi-border: #34343c;
+  --erabi-border-hover: #4a4a55;
+  --erabi-accent: #7c9cff;
+  --erabi-accent-text: #0e0e12;
+  --erabi-invalid: #ff7b72;
+  --erabi-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+
+  --erabi-gray-surface: #313336;
+  --erabi-gray-text: #d8dbdf;
+  --erabi-brown-surface: #3f2f24;
+  --erabi-brown-text: #edd6c7;
+  --erabi-orange-surface: #4e270d;
+  --erabi-orange-text: #ffcdae;
+  --erabi-yellow-surface: #413000;
+  --erabi-yellow-text: #eed9a5;
+  --erabi-green-surface: #193b22;
+  --erabi-green-text: #bde8c4;
+  --erabi-blue-surface: #1a3453;
+  --erabi-blue-text: #bbdeff;
+  --erabi-purple-surface: #3b294f;
+  --erabi-purple-text: #e6cfff;
+  --erabi-pink-surface: #4b2437;
+  --erabi-pink-text: #ffc8e1;
+  --erabi-red-surface: #53211f;
+  --erabi-red-text: #ffc6bf;
+}
+
+@media (pointer: coarse) {
+  :where(:root) {
+    --erabi-field-height: 2.75rem;
+    --erabi-row-height: 2.75rem;
+  }
+}
+
+/* The picker. Before the hook mounts, its native <select> is the field. */
+
+.erabi {
+  position: relative;
+  display: block;
+  font-family: var(--erabi-font);
+  font-size: var(--erabi-font-size);
+  line-height: var(--erabi-line-height);
+  color: var(--erabi-text);
+}
+
+.erabi-native {
+  width: 100%;
+  min-height: var(--erabi-field-height);
+  font: inherit;
+}
+
+.erabi.erabi-ready > .erabi-native {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  border: 0;
+  white-space: nowrap;
+}
+
+.erabi template,
+.erabi-live {
+  display: none;
+}
+
+.erabi-live {
+  display: block;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The field */
+
+.erabi-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  box-sizing: border-box;
+  min-height: var(--erabi-field-height);
+  padding: 0.25rem 2.25rem 0.25rem 0.625rem;
+  background: var(--erabi-background);
+  border: 1px solid var(--erabi-border);
+  border-radius: var(--erabi-radius);
+  cursor: pointer;
+  position: relative;
+  transition: border-color var(--erabi-transition), box-shadow var(--erabi-transition);
+}
+
+.erabi-field:hover {
+  border-color: var(--erabi-border-hover);
+}
+
+.erabi-field:focus-visible,
+.erabi-field:has(.erabi-input:focus-visible) {
+  outline: none;
+  box-shadow: var(--erabi-focus-ring);
+}
+
+.erabi-field[aria-invalid="true"],
+.erabi-field:has(.erabi-input[aria-invalid="true"]) {
+  border-color: var(--erabi-invalid);
+}
+
+.erabi-field[aria-disabled="true"],
+.erabi-field:has(.erabi-input:disabled) {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.erabi-field[aria-readonly="true"] {
+  cursor: default;
+  background: var(--erabi-surface);
+}
+
+.erabi-values {
+  display: contents;
+}
+
+.erabi-select .erabi-values,
+.erabi-person:not(:has([aria-multiselectable])) .erabi-values {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.erabi-placeholder {
+  color: var(--erabi-muted);
+}
+
+.erabi-input {
+  flex: 1 1 6rem;
+  min-width: 4rem;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  padding: 0.125rem 0;
+}
+
+.erabi-input::placeholder {
+  color: var(--erabi-muted);
+}
+
+.erabi-chevron,
+.erabi-clear {
+  position: absolute;
+  inset-inline-end: 0.625rem;
+  top: 50%;
+  translate: 0 -50%;
+  display: inline-flex;
+  color: var(--erabi-muted);
+}
+
+.erabi-clear[hidden] {
+  display: none;
+}
+
+.erabi-clear {
+  inset-inline-end: 2rem;
+  padding: 0.125rem;
+  border: 0;
+  background: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.erabi-clear:hover {
+  color: var(--erabi-text);
+  background: var(--erabi-active);
+}
+
+.erabi:has(.erabi-clear:not([hidden])) .erabi-field {
+  padding-inline-end: 3.5rem;
+}
+
+.erabi-chevron .erabi-icon {
+  transition: rotate var(--erabi-transition);
+}
+
+.erabi-open .erabi-chevron .erabi-icon {
+  rotate: 180deg;
+}
+
+.erabi-icon {
+  width: var(--erabi-icon-size);
+  height: var(--erabi-icon-size);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+
+/* Chips: the chosen values of a picker of several, and colored options. */
+
+.erabi-chip {
+  --erabi-chip-surface: var(--erabi-gray-surface);
+  --erabi-chip-text: var(--erabi-gray-text);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 100%;
+  min-height: 1.5rem;
+  padding: 0 0.5rem;
+  box-sizing: border-box;
+  border-radius: var(--erabi-chip-radius);
+  background: var(--erabi-chip-surface);
+  color: var(--erabi-chip-text);
+  font-size: var(--erabi-small);
+  font-weight: 500;
+  line-height: 1.5rem;
+  white-space: nowrap;
+}
+
+.erabi-chip:has(.erabi-avatar) {
+  padding-inline-start: 0.1875rem;
+}
+
+.erabi-chip-label,
+.erabi-chip .erabi-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* A chip of a CSS color of the app's: its surface and text mixed from it. */
+.erabi-chip[style*="--erabi-chip-color"] {
+  --erabi-chip-surface: color-mix(in oklab, var(--erabi-chip-color) 18%, var(--erabi-background));
+  --erabi-chip-text: color-mix(in oklab, var(--erabi-chip-color) 70%, var(--erabi-text));
+}
+
+.erabi-chip[data-color="gray"] { --erabi-chip-surface: var(--erabi-gray-surface); --erabi-chip-text: var(--erabi-gray-text); }
+.erabi-chip[data-color="brown"] { --erabi-chip-surface: var(--erabi-brown-surface); --erabi-chip-text: var(--erabi-brown-text); }
+.erabi-chip[data-color="orange"] { --erabi-chip-surface: var(--erabi-orange-surface); --erabi-chip-text: var(--erabi-orange-text); }
+.erabi-chip[data-color="yellow"] { --erabi-chip-surface: var(--erabi-yellow-surface); --erabi-chip-text: var(--erabi-yellow-text); }
+.erabi-chip[data-color="green"] { --erabi-chip-surface: var(--erabi-green-surface); --erabi-chip-text: var(--erabi-green-text); }
+.erabi-chip[data-color="blue"] { --erabi-chip-surface: var(--erabi-blue-surface); --erabi-chip-text: var(--erabi-blue-text); }
+.erabi-chip[data-color="purple"] { --erabi-chip-surface: var(--erabi-purple-surface); --erabi-chip-text: var(--erabi-purple-text); }
+.erabi-chip[data-color="pink"] { --erabi-chip-surface: var(--erabi-pink-surface); --erabi-chip-text: var(--erabi-pink-text); }
+.erabi-chip[data-color="red"] { --erabi-chip-surface: var(--erabi-red-surface); --erabi-chip-text: var(--erabi-red-text); }
+
+.erabi-remove {
+  display: inline-flex;
+  margin-inline: 0.0625rem -0.25rem;
+  padding: 0.125rem;
+  border-radius: 4px;
+  opacity: 0.65;
+  cursor: pointer;
+}
+
+.erabi-remove .erabi-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.erabi-remove:hover {
+  opacity: 1;
+  background: color-mix(in oklab, currentColor 14%, transparent);
+}
+
+/* Avatars: an image, or initials on the person's color; an agent's is a
+   rounded square, as Issho draws them. */
+
+.erabi-avatar {
+  --erabi-avatar-color: var(--erabi-muted);
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: var(--erabi-avatar-size);
+  height: var(--erabi-avatar-size);
+  border-radius: 50%;
+  overflow: hidden;
+  background: color-mix(in oklab, var(--erabi-avatar-color) 22%, var(--erabi-background));
+  color: color-mix(in oklab, var(--erabi-avatar-color) 80%, var(--erabi-text));
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.erabi-avatar[data-kind="agent"] {
+  border-radius: var(--erabi-agent-radius);
+}
+
+.erabi-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.erabi-badge,
+.erabi-me {
+  flex: none;
+  padding: 0 0.3125rem;
+  border-radius: 4px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.125rem;
+  color: var(--erabi-muted);
+  border: 1px solid var(--erabi-border);
+}
+
+.erabi-option-icon {
+  display: inline-flex;
+  flex: none;
+  width: var(--erabi-icon-size);
+  height: var(--erabi-icon-size);
+  color: var(--erabi-muted);
+}
+
+.erabi-option-icon > * {
+  width: 100%;
+  height: 100%;
+}
+
+/* The popup: in the top layer where the browser has it. */
+
+.erabi-popup {
+  box-sizing: border-box;
+  z-index: 1000;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--erabi-background);
+  color: var(--erabi-text);
+  border: 0;
+  border-radius: var(--erabi-radius);
+  box-shadow: var(--erabi-shadow);
+  font-family: var(--erabi-font);
+  font-size: var(--erabi-font-size);
+  line-height: var(--erabi-line-height);
+  inset: auto;
+}
+
+.erabi-popup[hidden] {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .erabi-popup:popover-open {
+    animation: erabi-in var(--erabi-transition);
+  }
+}
+
+@keyframes erabi-in {
+  from {
+    opacity: 0;
+    translate: 0 -4px;
+  }
+}
+
+.erabi-popup[data-side="top"] {
+  animation-name: none;
+}
+
+.erabi-filter-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--erabi-border);
+  color: var(--erabi-muted);
+}
+
+.erabi-filter {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: var(--erabi-text);
+}
+
+.erabi-list {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.25rem;
+  outline: none;
+}
+
+.erabi-rows {
+  position: relative;
+}
+
+.erabi-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-sizing: border-box;
+  min-height: var(--erabi-row-height);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--erabi-inner-radius);
+  cursor: pointer;
+  user-select: none;
+}
+
+.erabi-virtual .erabi-option,
+.erabi-virtual .erabi-heading,
+.erabi-virtual .erabi-status {
+  height: var(--erabi-row-height);
+}
+
+.erabi-option.erabi-active {
+  background: var(--erabi-active);
+}
+
+.erabi-option[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.erabi-option > .erabi-label {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.erabi-hint {
+  margin-inline-start: auto;
+  padding-inline-start: 0.5rem;
+  color: var(--erabi-muted);
+  font-size: var(--erabi-small);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.erabi-match {
+  background: none;
+  color: var(--erabi-match);
+  font-weight: 600;
+}
+
+.erabi-chip .erabi-match {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.erabi-check {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  border: 1.5px solid var(--erabi-border-hover);
+  border-radius: 4px;
+  color: transparent;
+}
+
+.erabi-check .erabi-icon {
+  width: 12px;
+  height: 12px;
+  stroke-width: 3;
+}
+
+.erabi-option[aria-selected="true"] .erabi-check {
+  background: var(--erabi-accent);
+  border-color: var(--erabi-accent);
+  color: var(--erabi-accent-text);
+}
+
+.erabi-tick {
+  display: inline-flex;
+  margin-inline-start: auto;
+  color: var(--erabi-accent);
+}
+
+.erabi-hint + .erabi-tick {
+  margin-inline-start: 0.5rem;
+}
+
+.erabi-create {
+  color: var(--erabi-muted);
+}
+
+.erabi-create .erabi-label {
+  color: var(--erabi-text);
+}
+
+.erabi-heading {
+  display: flex;
+  align-items: flex-end;
+  box-sizing: border-box;
+  min-height: 1.75rem;
+  padding: 0.5rem 0.5rem 0.25rem;
+  color: var(--erabi-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.erabi-status {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: var(--erabi-row-height);
+  padding: 0.25rem 0.5rem;
+  color: var(--erabi-muted);
+  font-size: var(--erabi-small);
+}
+
+.erabi-retry {
+  cursor: pointer;
+  color: var(--erabi-invalid);
+}
+
+.erabi-busy::before {
+  content: "";
+  width: 0.75rem;
+  height: 0.75rem;
+  margin-inline-end: 0.5rem;
+  border: 2px solid var(--erabi-border);
+  border-top-color: var(--erabi-accent);
+  border-radius: 50%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .erabi-busy::before {
+    animation: erabi-spin 700ms linear infinite;
+  }
+}
+
+@keyframes erabi-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@media (forced-colors: active) {
+  .erabi-field,
+  .erabi-popup {
+    border: 1px solid CanvasText;
+  }
+
+  .erabi-option.erabi-active {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+
+  .erabi-chip {
+    border: 1px solid CanvasText;
+  }
+
+  .erabi-option[aria-selected="true"] .erabi-check {
+    background: Highlight;
+  }
+}
