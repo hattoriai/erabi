@@ -84,14 +84,16 @@ if Code.ensure_loaded?(Issho.Motion) do
     picker; gives what `fun` gives.
 
     When someone else holds the picker's lock, the agent does not choose:
-    `{:error, {:locked, key}}`, with the holder's key.
+    `{:error, {:locked, key}}`, with the holder's key. An agent that a
+    person paused or stopped (`Issho.Work`) does not choose either: it
+    gives Issho's `{:error, {:interrupted, by}}`.
 
     Options: `:pace`, how long the agent stays on each option before it
     takes it (#{@pace} ms; 0 for none), and `:travel` (`false`: the agent
     is there at once, as `Issho.Motion` says).
     """
     @spec choose(GenServer.server(), String.t(), term(), (-> result), keyword()) ::
-            result | {:error, {:locked, String.t()}}
+            result | {:error, {:locked, String.t()} | term()}
           when result: term()
     def choose(participant, document, value, fun, opts \\ []) when is_function(fun, 0) do
       travel = Keyword.get(opts, :travel, true)
@@ -115,19 +117,46 @@ if Code.ensure_loaded?(Issho.Motion) do
     end
 
     defp walk(participant, document, value, fun, travel, pace) do
-      :ok = Participant.lock(participant, [lock(document, System.system_time(:millisecond))])
-      :ok = Motion.go(participant, place(document, %{}), travel: travel)
-
-      for option <- Erabi.Option.params(value) do
-        target = place(document, %{"open" => true, "option" => option})
-        :ok = Motion.go(participant, target, travel: travel)
-        if pace > 0, do: Motion.pause(participant, target, pace)
-      end
-
-      try do
+      with :ok <-
+             Participant.lock(participant, [lock(document, System.system_time(:millisecond))]),
+           :ok <- Motion.go(participant, place(document, %{}), travel: travel),
+           :ok <- through(participant, document, Erabi.Option.params(value), travel, pace),
+           :ok <- present(participant) do
         fun.()
-      after
-        Participant.aware(participant, %{"place" => nil, "locks" => []})
+      end
+    after
+      # A paused or stopped agent's awareness is refused too: it has none to leave.
+      Participant.aware(participant, %{"place" => nil, "locks" => []})
+    end
+
+    # Whether a person paused or stopped the agent, before or as it went
+    # through the picker: then the app's change does not run.
+    defp present(participant) do
+      case Participant.interrupted(participant) do
+        nil -> :ok
+        by -> {:error, {:interrupted, by}}
+      end
+    end
+
+    # To each option, a moment on each; or the first error.
+    defp through(participant, document, options, travel, pace) do
+      Enum.reduce_while(options, :ok, fn option, :ok ->
+        case visit(
+               participant,
+               place(document, %{"open" => true, "option" => option}),
+               travel,
+               pace
+             ) do
+          :ok -> {:cont, :ok}
+          error -> {:halt, error}
+        end
+      end)
+    end
+
+    defp visit(participant, target, travel, pace) do
+      with :ok <- Motion.go(participant, target, travel: travel) do
+        if pace > 0, do: Motion.pause(participant, target, pace)
+        :ok
       end
     end
 

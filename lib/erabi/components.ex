@@ -329,7 +329,7 @@ defmodule Erabi.Components do
   defp issho_join(issho, user) do
     unless Code.ensure_loaded?(Erabi.Issho.Presence) do
       raise ArgumentError,
-            "Erabi: a picker's `issho` needs Issho in your deps: {:issho, \"~> 0.3\"}"
+            "Erabi: a picker's `issho` needs Issho in your deps: {:issho, \"~> 0.4\"}"
     end
 
     if user == nil,

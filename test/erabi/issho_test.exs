@@ -159,7 +159,28 @@ defmodule Erabi.IsshoTest do
              end)
 
     assert_received {:during, %{holder: %{"name" => "Claude", "kind" => "agent"}}}
-    assert %{holder: nil} = last_push(ada)
+    # The agent's leaving comes through the room, when it comes.
+    assert_receive {_ref, {:push_event, "erabi:people", %{id: "status_picker", holder: nil}}},
+                   1000
+  end
+
+  test "an agent that a person paused does not choose, and says why", %{room: room} do
+    ctx = Context.new(ErabiTest.Issho, %{id: "agent:claude", name: "Claude", kind: :agent})
+    {:ok, participant} = Context.join(ctx, room)
+
+    :ok =
+      Issho.Work.interrupt(ErabiTest.Issho, room, Issho.Participant.key(participant), :pause,
+        by: %{id: "ada", name: "Ada"}
+      )
+
+    # The pause comes over PubSub: the participant has it once it answers.
+    assert Enum.any?(1..50, fn _ ->
+             Process.sleep(10)
+             Issho.Participant.interrupted(participant) != nil
+           end)
+
+    assert {:error, {:interrupted, _by}} =
+             Erabi.Issho.choose(participant, room <> "/status", "done", fn -> flunk("chose") end)
   end
 
   test "lock: false shares where people are, and locks nothing", %{room: room} do

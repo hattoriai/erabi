@@ -63,7 +63,9 @@ and Erabi follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   has a picker open, the option each is on, a read-only peek of the list
   where they are, one at a time (the first to open the list holds the
   picker's lock; `lock: false` for none), and `Erabi.Issho.choose/5` for
-  an agent to go through the options before its change lands.
+  an agent to go through the options before its change lands; an agent
+  that a person paused or stopped (Issho 0.4's `Issho.Work`) does not
+  choose, and gets `{:error, {:interrupted, by}}`. Issho 0.4 or later.
 - `Erabi.Test`: `choose/3`, `choices/2`, `chosen/2`, `search/3`.
 - The Sumi theme (`erabi-sumi.css`), dark mode, forced colors, reduced
   motion.

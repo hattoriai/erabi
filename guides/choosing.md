@@ -25,7 +25,7 @@ and shares as it does. Erabi carries only who is choosing, and where.
 the picker's document names it in its room (the part before the first
 `"/"`, so the pickers of a page share its people), and the LiveView joins
 the room for it. `user` is the person, as `Issho.Actor` says them. Add
-Issho to your deps (`{:issho, "~> 0.3"}`) and `on_mount Issho.Live` to the
+Issho to your deps (`{:issho, "~> 0.4"}`) and `on_mount Issho.Live` to the
 LiveView.
 
 ## What people see
