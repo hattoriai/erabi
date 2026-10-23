@@ -111,7 +111,7 @@ defmodule Erabi.MixProject do
         "guides/options.md",
         "guides/forms.md",
         "guides/rules.md",
-        "guides/search.md",
+        "guides/server-search.md",
         "guides/grids.md",
         "guides/choosing.md",
         "guides/testing.md",

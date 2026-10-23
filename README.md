@@ -190,7 +190,7 @@ on_mount Erabi.Live
 * [Options](guides/options.md) - labels, colors, icons, groups, people.
 * [Forms](guides/forms.md) - what a picker posts, changesets, errors, labels.
 * [Rules](guides/rules.md) - the same rules in the browser and on the server.
-* [Search](guides/search.md) - options from the server as people type.
+* [Search](guides/server-search.md) - options from the server as people type.
 * [Grids](guides/grids.md) - pickers as the editors of Masu's cells.
 * [Choosing together](guides/choosing.md) - who else is choosing, with Issho; agents that choose as people watch.
 * [Testing](guides/testing.md) - `Erabi.Test` in `Phoenix.LiveViewTest`.

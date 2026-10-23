@@ -107,7 +107,7 @@ move by 1 (Shift, by 5 or 10), Enter takes the color and closes.
 | `id` | the picker's element; the field's id with `_picker` unless given |
 | `options` | the options (see [Options](options.md)) |
 | `selected` | options of chosen values that are not in `options` (a search's), for their labels |
-| `search`, `async` | options from the server as people type (see [Search](search.md)) |
+| `search`, `async` | options from the server as people type (see [Search](server-search.md)) |
 | `rules`, `required`, `min`, `max`, `create` | the rules (see [Rules](rules.md)) |
 | `filter` | a box to filter the list; from 10 options unless given |
 | `clearable` | a clear button on a picker of one value; unless `required` |
