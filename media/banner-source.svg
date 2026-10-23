@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="800" viewBox="0 0 1600 800" role="img" aria-labelledby="title description">
+<title id="title">Erabi — Pickers for Phoenix</title>
+<desc id="description">Four circles in Sumi ink, one chosen in blade orange with a check. Cormorant Garamond wordmark and Outfit supporting text.</desc>
+<rect width="1600" height="800" fill="#f5f0e8"/>
+<g transform="translate(394.4 254) scale(2.2)"><circle cx="35" cy="35" r="19" fill="#0a0a0b"/>
+<circle cx="35" cy="77" r="19" fill="#0a0a0b"/>
+<circle cx="77" cy="77" r="19" fill="#0a0a0b"/>
+<circle cx="77" cy="35" r="19" fill="#e84a1c"/>
+<path d="M67.5 35.5L74 42L86.5 29.5" fill="none" stroke="#f5f0e8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></g>
+<path d="M128 109H160" fill="none" stroke="#e84a1c" stroke-width="2"/>
+<text x="684" y="423" font-family="Cormorant Garamond" font-weight="300" font-size="160" letter-spacing="19.2" fill="#0a0a0b">ERABI</text>
+<text x="691" y="484" font-family="Outfit" font-weight="300" font-size="28" fill="#0a0a0b">Pickers for Phoenix.</text>
+<text x="181" y="115" font-family="Outfit" font-weight="500" font-size="16" letter-spacing="3.2" fill="#0a0a0b">HATTORI AI</text>
+</svg>

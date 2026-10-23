@@ -389,8 +389,8 @@ defmodule ErabiDev.PlainHTML do
     ~H"""
     <h1>Without LiveView</h1>
     <form id="plain-form" action="/plain" method="get">
-      <label class="label" id="plain-label">Labels</label>
-      <.multi_select name="labels" value={@labels} options={ErabiDev.Data.labels()} label_id="plain-label" />
+      <label class="label" for="labels">Labels</label>
+      <.multi_select name="labels" value={@labels} options={ErabiDev.Data.labels()} />
       <p><button type="submit">Send</button></p>
     </form>
     <pre id="query">{@query}</pre>

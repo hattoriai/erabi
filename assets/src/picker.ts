@@ -111,6 +111,16 @@ export class Picker {
   private build(): void {
     const listId = `${this.id}-list`;
     const config = this.config;
+    // A <label for> of the native control names the picker, and a click on it opens it.
+    const label = !config.labelId && this.native?.labels?.[0] ? this.native.labels[0] : null;
+    if (label) {
+      label.id ||= `${this.id}-label`;
+      config.labelId = label.id;
+      label.addEventListener("click", (event) => {
+        event.preventDefault();
+        this.control.focus();
+      });
+    }
     const named = { "aria-labelledby": config.labelId ?? null, "aria-label": config.labelId ? null : (config.label ?? null) };
     const described = { "aria-describedby": config.describedBy ?? null, "aria-invalid": config.invalid ? "true" : null };
 
@@ -775,6 +785,19 @@ export class Picker {
 
   focus(): void {
     this.control.focus();
+  }
+
+  /** Types into the picker, as a person would: the box of the field, or of its list. */
+  type(text: string): void {
+    const box = this.input ?? this.filterInput;
+    if (!box) {
+      for (const char of text) this.typeahead(char);
+      return;
+    }
+    if (!this.popup.open) this.open();
+    box.value = text;
+    box.focus();
+    this.setQuery(text);
   }
 
   /** Whether a node is the picker's: its popup is in the top layer, but inside its element. */

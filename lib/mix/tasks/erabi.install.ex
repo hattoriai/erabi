@@ -133,6 +133,9 @@ defmodule Mix.Tasks.Erabi.Install do
     For the Sumi theme, remove the comment marks around the erabi-sumi.css
     import in assets/css/app.css.
 
+    A picker with `search` runs it in its LiveView: add `on_mount Erabi.Live`
+    to the LiveView (or to its live_session).
+
     On a page without LiveView, the hook does not run. Import mountErabi
     in the page's script and call it after the page loads:
 

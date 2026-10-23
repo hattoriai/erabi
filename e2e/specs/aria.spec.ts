@@ -43,3 +43,11 @@ test.describe("accessibility", () => {
     await expect(field(page, "task_priority_picker")).toContainText("Escolher…");
   });
 });
+
+test("a <label for> of the field names the picker, and a click on it focuses it", async ({ page }) => {
+  await openPage(page, "/plain");
+  const field = page.getByRole("combobox", { name: "Labels" });
+  await expect(field).toBeAttached();
+  await page.locator("label[for=labels]").click();
+  await expect(field).toBeFocused();
+});

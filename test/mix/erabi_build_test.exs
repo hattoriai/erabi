@@ -7,7 +7,7 @@ defmodule Mix.Tasks.Erabi.BuildTest do
   @root Path.expand("../..", __DIR__)
   @static Path.join(@root, "priv/static")
   @files ~w(erabi.esm.js erabi.cjs.js erabi.css erabi-sumi.css)
-  @exports ~w(Erabi mountErabi)
+  @exports ~w(Erabi cellEditor erabiEditors mountErabi)
 
   @moduletag :build
   @moduletag timeout: 600_000
@@ -52,7 +52,7 @@ defmodule Mix.Tasks.Erabi.BuildTest do
     assert @static |> File.ls!() |> Enum.sort() == Enum.sort(@files)
   end
 
-  test "the ESM bundle exports the hook and mountErabi" do
+  test "the ESM bundle exports the hook, mountErabi and the cell editors" do
     esm = File.read!(Path.join(@static, "erabi.esm.js"))
     [exports] = Regex.run(~r/export\{([^}]*)\}/, esm, capture: :all_but_first)
     names = exports |> String.split(",") |> Enum.map(&(&1 |> String.split(" as ") |> List.last()))
@@ -112,7 +112,7 @@ defmodule Mix.Tasks.Erabi.BuildTest do
       @describetag skip: "node is not on the path, so the CJS bundle cannot be required"
     end
 
-    test "require() of the package entry point gives the hook and mountErabi" do
+    test "require() of the package entry point gives the hook, mountErabi and the cell editors" do
       script = """
       const erabi = require("./priv/static/erabi.cjs.js");
       process.stdout.write(JSON.stringify(Object.keys(erabi).sort()));

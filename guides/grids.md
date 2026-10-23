@@ -1,0 +1,46 @@
+# Grids
+
+A picker can be the editor of a grid's cells: a column of
+[Masu](https://hex.pm/packages/masu) whose cells are a status, labels or
+a person.
+
+## The column
+
+`Erabi.cell_editor/2` gives the column's `editor`, with its options,
+rules and words resolved on the server:
+
+```heex
+<.data_grid id="tasks" source={@tasks}>
+  <:col field={:status} editor={Erabi.cell_editor(:select, options: @statuses)} />
+  <:col field={:labels} editor={Erabi.cell_editor(:multi_select, options: @labels, max: 3)} />
+  <:col field={:owner_id} editor={Erabi.cell_editor(:person, options: @members, me: @current_user)} />
+</.data_grid>
+```
+
+The kinds are `:select`, `:multi_select`, `:combobox`, `:tags` and
+`:person` (with `multiple: true` for several people), and the options
+those of the components: `options`, `rules` and its shortcuts, `filter`,
+`me`, `placeholder`, `locale` and `messages`.
+
+## The browser
+
+Register the editors once, in your app's JavaScript:
+
+```js
+import { configure } from "masu"
+import { erabiEditors } from "erabi"
+
+configure({ editors: erabiEditors() })
+```
+
+## How it edits
+
+The picker draws over the cell, with its list open; a letter that opened
+the editor is typed into it. A picker of one value saves it as it is
+chosen. A picker of several saves when the editor closes: Tab or a click
+away, as the grid's own editors do. Escape closes the picker's list
+first, and then lets the edit go.
+
+The grid's rules hold as for its own editors: it checks the value by the
+column's type and the changeset, and keeps undo, conflicts and "Ada is
+editing".

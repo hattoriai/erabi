@@ -100,7 +100,26 @@ defmodule Erabi.MixProject do
       source_url: @source_url,
       # The banner of the README, at the same relative path in the docs.
       assets: %{"media" => "media"},
-      extras: ["README.md", "CHANGELOG.md"],
+      extras: [
+        "README.md",
+        "guides/quickstart.md",
+        "guides/pickers.md",
+        "guides/options.md",
+        "guides/forms.md",
+        "guides/rules.md",
+        "guides/search.md",
+        "guides/grids.md",
+        "guides/testing.md",
+        "guides/theming.md",
+        "guides/accessibility.md",
+        "guides/limits.md",
+        "CHANGELOG.md"
+      ],
+      groups_for_extras: [
+        Guides:
+          ~r{guides/(quickstart|pickers|options|forms|rules|search|grids|testing|theming)\.md},
+        Reference: ["guides/accessibility.md", "guides/limits.md"]
+      ],
       groups_for_modules: [
         Pickers: [Erabi, Erabi.Components, Erabi.Option, Erabi.Live, Erabi.Messages],
         Rules: [Erabi.Rules, Erabi.Changeset, Erabi.Match],
