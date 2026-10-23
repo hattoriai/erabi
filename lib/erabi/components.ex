@@ -209,7 +209,7 @@ defmodule Erabi.Components do
       do:
         raise(ArgumentError, "Erabi: a picker with `issho` needs its `user`, the person choosing")
 
-    Issho.Join.new!(issho)
+    Issho.Join.new!(issho, [:lock])
   end
 
   # The options of chosen values that are not among the options.

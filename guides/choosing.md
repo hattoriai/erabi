@@ -36,8 +36,28 @@ LiveView.
 * In the list, when they open it too: the option each one is on, marked
   with their avatar.
 * When the list is closed on their screen: a peek of it, read-only, with
-  the other's option marked in their color, moving as they move. It goes
-  when they close the list, or when this person opens their own.
+  the other's option tinted in their color, moving as they move. It goes
+  when they close the list.
+
+## One at a time
+
+A picker is chosen in by one person at a time. The one who opens its
+list holds its lock until they close it, or leave: on the others'
+screens, the picker says who is choosing, does not open (a nudge, and a
+screen reader hears who), and shows the peek. If two open it at the
+same moment, the one who opened it first keeps it on every screen, and
+the other's list closes with the reason. An agent holds the lock while
+it chooses, and does not choose while someone else holds it
+(`{:error, {:locked, key}}`).
+
+`lock: false` in `issho` turns the locks off: everyone may open the
+picker at once, and each sees the others' options marked in their list.
+
+The lock is the people's way of not choosing over each other, not a
+check: a form still posts, and the app's document keeps the last value
+saved.
+
+## Pointers
 
 With Issho's pointers on the page, a person's pointer over an option is
 that option on every screen, and an agent's pointer goes to it

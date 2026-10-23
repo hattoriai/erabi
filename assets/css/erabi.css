@@ -651,10 +651,12 @@
 }
 
 .erabi-avatar.erabi-peer {
-  width: 1.125rem;
-  height: 1.125rem;
-  font-size: 0.5rem;
-  box-shadow: 0 0 0 1.5px var(--erabi-background), 0 0 0 3px var(--erabi-avatar-color);
+  width: 1.25rem;
+  height: 1.25rem;
+  font-size: 0.5625rem;
+  background: var(--erabi-avatar-color);
+  color: #fff;
+  box-shadow: 0 0 0 2px var(--erabi-background);
 }
 
 .erabi-peers .erabi-peer + .erabi-peer {
@@ -671,7 +673,26 @@
 
 .erabi-field.erabi-peer-open {
   border-color: var(--erabi-peer);
-  box-shadow: 0 0 0 1px var(--erabi-peer);
+}
+
+/* Someone else holds the lock: the field says so, and does not open. */
+.erabi-field.erabi-locked {
+  cursor: not-allowed;
+}
+
+.erabi-field.erabi-locked .erabi-chevron {
+  opacity: 0.4;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .erabi-field.erabi-refused {
+    animation: erabi-nudge 240ms ease-in-out;
+  }
+}
+
+@keyframes erabi-nudge {
+  25% { translate: -3px 0; }
+  75% { translate: 3px 0; }
 }
 
 .erabi-peek {
@@ -682,13 +703,20 @@
   max-height: 15rem;
 }
 
+/* The other's option: a tint of their color, and their avatar. */
 .erabi-peek .erabi-option.erabi-active {
-  background: color-mix(in oklab, var(--erabi-peer, var(--erabi-accent)) 16%, var(--erabi-background));
-  box-shadow: inset 0 0 0 1.5px var(--erabi-peer, var(--erabi-accent));
+  background: color-mix(in oklab, var(--erabi-peer, var(--erabi-accent)) 12%, var(--erabi-background));
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .erabi-peek .erabi-option {
-    transition: background var(--erabi-transition), box-shadow var(--erabi-transition);
+    transition: background var(--erabi-transition);
+  }
+}
+
+@media (forced-colors: active) {
+  .erabi-peek .erabi-option.erabi-active {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
   }
 }

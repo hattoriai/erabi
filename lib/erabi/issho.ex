@@ -49,6 +49,20 @@ if Code.ensure_loaded?(Issho.Motion) do
     moves only for someone who sees the picker, within Issho's time budget
     (`Issho.Motion`); else the value lands at once.
 
+    ## Locks
+
+    A picker is chosen in by one at a time: the person who opens its list
+    holds its lock, until they close it or leave. The others see who is
+    choosing, and their picker does not open; if two open it at once, the
+    one who opened it first keeps it, and the other's list closes with
+    the reason. An agent takes the lock as it chooses, and `choose/5`
+    gives `{:error, {:locked, key}}` when someone else holds it.
+    `lock: false` in the picker's `issho` turns the locks off.
+
+    The lock is the people's way of not choosing over each other, not a
+    check: a form posts as it does, and the app's document keeps the last
+    value saved.
+
     ## Places
 
     A place in a picker is `%{"open" => true, "option" => value}` (the
@@ -69,16 +83,39 @@ if Code.ensure_loaded?(Issho.Motion) do
     for a picker of several), runs `fun` (the app's change), and leaves the
     picker; gives what `fun` gives.
 
+    When someone else holds the picker's lock, the agent does not choose:
+    `{:error, {:locked, key}}`, with the holder's key.
+
     Options: `:pace`, how long the agent stays on each option before it
     takes it (#{@pace} ms; 0 for none), and `:travel` (`false`: the agent
     is there at once, as `Issho.Motion` says).
     """
-    @spec choose(GenServer.server(), String.t(), term(), (-> result), keyword()) :: result
+    @spec choose(GenServer.server(), String.t(), term(), (-> result), keyword()) ::
+            result | {:error, {:locked, String.t()}}
           when result: term()
     def choose(participant, document, value, fun, opts \\ []) when is_function(fun, 0) do
       travel = Keyword.get(opts, :travel, true)
       pace = Keyword.get(opts, :pace, @pace)
+      own = Participant.key(participant)
 
+      case lock_holder(participant, document) do
+        holder when holder in [nil, own] -> walk(participant, document, value, fun, travel, pace)
+        holder -> {:error, {:locked, holder}}
+      end
+    end
+
+    defp lock_holder(participant, document) do
+      participant
+      |> Participant.locks()
+      |> Enum.filter(&match?({%{"doc" => ^document}, _key}, &1))
+      |> Enum.min_by(fn {place, key} -> {get_in(place, ["at", "since"]) || 0, key} end, fn ->
+        {nil, nil}
+      end)
+      |> elem(1)
+    end
+
+    defp walk(participant, document, value, fun, travel, pace) do
+      :ok = Participant.lock(participant, [lock(document, System.system_time(:millisecond))])
       :ok = Motion.go(participant, place(document, %{}), travel: travel)
 
       for option <- Erabi.Option.params(value) do
@@ -90,8 +127,27 @@ if Code.ensure_loaded?(Issho.Motion) do
       try do
         fun.()
       after
-        Participant.place(participant, nil)
+        Participant.aware(participant, %{"place" => nil, "locks" => []})
       end
+    end
+
+    @doc false
+    # A picker's lock, as a session's awareness holds it: since when.
+    @spec lock(String.t(), integer()) :: map()
+    def lock(document, since), do: %{"doc" => document, "at" => %{"since" => since}}
+
+    @doc false
+    # Who holds a picker's lock, of the room's awareness states: the one
+    # who took it first (then by key, so every screen agrees), or nil.
+    @spec holder([map()], String.t()) :: String.t() | nil
+    def holder(states, document) do
+      states
+      |> Enum.flat_map(fn %{"key" => key} = state ->
+        for %{"doc" => ^document} = lock <- get_in(state, ["state", "locks"]) || [],
+            do: {get_in(lock, ["at", "since"]) || 0, key}
+      end)
+      |> Enum.min(fn -> {nil, nil} end)
+      |> elem(1)
     end
 
     @doc """

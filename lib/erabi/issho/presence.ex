@@ -57,12 +57,16 @@ if Code.ensure_loaded?(Issho.Live) do
         put_place(socket.assigns.join, at)
       end
 
-      {:noreply, socket}
+      # Its own change is no event of the room's here: who holds the lock
+      # may have changed.
+      {:noreply, push_people(socket)}
     end
 
     def handle_event("erabi:place", _params, socket), do: {:noreply, socket}
 
     # The person's place in the picker, or none; a place elsewhere stays.
+    # With the list open, the person holds the picker's lock (unless the
+    # picker's `issho` says `lock: false`), from when they first took it.
     defp put_place(join, at) do
       doc = join.document
       state = Issho.Live.awareness(join.room)
@@ -74,8 +78,18 @@ if Code.ensure_loaded?(Issho.Live) do
           true -> state["place"]
         end
 
-      Issho.Live.aware(join.room, Map.put(state, "place", place))
+      {mine, others} = Enum.split_with(state["locks"] || [], &match?(%{"doc" => ^doc}, &1))
+
+      locks =
+        if Map.get(join.extra, :lock, true) and match?(%{"open" => true}, at),
+          do: [Erabi.Issho.lock(doc, since(mine)) | others],
+          else: others
+
+      Issho.Live.aware(join.room, state |> Map.put("place", place) |> Map.put("locks", locks))
     end
+
+    defp since([%{"at" => %{"since" => since}} | _]), do: since
+    defp since(_none), do: System.system_time(:millisecond)
 
     defp leave(join), do: put_place(join, nil)
 
@@ -85,11 +99,13 @@ if Code.ensure_loaded?(Issho.Live) do
       %{join: join, own: own, picker: picker} = socket.assigns
       doc = join.document
       metas = Issho.Live.people(join.room)
+      # The room's states, and this session's own, which may be newer.
+      states =
+        Map.values(Issho.Live.states(join.room)) ++
+          [%{"key" => own, "state" => Issho.Live.awareness(join.room)}]
 
       people =
-        join.room
-        |> Issho.Live.states()
-        |> Map.values()
+        states
         |> Enum.flat_map(fn
           %{"key" => key, "state" => %{"place" => %{"doc" => ^doc, "at" => at}}}
           when key != own ->
@@ -102,7 +118,14 @@ if Code.ensure_loaded?(Issho.Live) do
         |> Enum.map(fn {key, at} -> person(key, at, metas) end)
         |> Enum.sort_by(&{&1["name"] || "", &1["key"]})
 
-      push_event(socket, "erabi:people", %{id: picker, people: people})
+      holder =
+        case Erabi.Issho.holder(states, doc) do
+          nil -> nil
+          ^own -> %{"key" => own, "mine" => true}
+          key -> key |> person(%{}, metas) |> Map.take(["key", "name", "color", "kind"])
+        end
+
+      push_event(socket, "erabi:people", %{id: picker, people: people, holder: holder})
     end
 
     defp push_people(socket), do: socket

@@ -39,14 +39,29 @@ test.describe("choosing together", () => {
     const row = await peek.locator(".erabi-active").boundingBox();
     expect(Math.round(box!.top)).toBe(Math.round(row!.y));
 
-    // Ada opens her own list: Ken's option is marked in it.
-    await adaField.click();
+    await ken.keyboard.press("Escape");
+    await expect(adaField).not.toHaveClass(/erabi-peer-open/);
     await expect(peek).toBeHidden();
-    await expect(ada.locator("#status_picker [role=listbox] .erabi-option", { hasText: kenActive }).locator(".erabi-peer")).toBeVisible();
+  });
+
+  test("one chooses at a time: the others' picker says who, and does not open", async ({ browser }) => {
+    const ada = await person(browser, "ada");
+    const ken = await person(browser, "ken");
+
+    await ken.locator("#status_picker .erabi-field").click();
+    const adaField = ada.locator("#status_picker .erabi-field");
+    await expect(adaField).toHaveClass(/erabi-locked/);
+
+    await adaField.click();
+    await expect(ada.locator("#status_picker [role=listbox]")).toBeHidden();
+    await expect(ada.locator("#status_picker .erabi-live")).toHaveText("Ken is choosing");
 
     await ken.keyboard.press("Escape");
+    await expect(adaField).not.toHaveClass(/erabi-locked/);
+    await adaField.click();
+    await expect(ada.locator("#status_picker [role=listbox]")).toBeVisible();
+    await expect(ken.locator("#status_picker .erabi-field")).toHaveClass(/erabi-locked/);
     await ada.keyboard.press("Escape");
-    await expect(adaField).not.toHaveClass(/erabi-peer-open/);
   });
 
   test("an agent goes through the options before the value lands", async ({ browser }) => {

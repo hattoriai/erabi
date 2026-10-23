@@ -41,7 +41,7 @@ function onServerEvent(picker: Picker, event: string, payload: Record<string, un
       picker.focus();
       break;
     case "erabi:people":
-      picker.setPeers((payload.people ?? []) as Parameters<Picker["setPeers"]>[0]);
+      picker.setPeers((payload.people ?? []) as Parameters<Picker["setPeers"]>[0], (payload.holder ?? null) as Parameters<Picker["setPeers"]>[1]);
       break;
   }
 }

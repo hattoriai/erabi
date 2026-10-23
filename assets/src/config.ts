@@ -88,6 +88,15 @@ export interface Config {
   issho?: { target: string };
 }
 
+/** Who holds a picker's lock, with Issho: someone else, or this person (`mine`). */
+export interface Holder {
+  key: string;
+  mine?: boolean;
+  name?: string;
+  color?: string;
+  kind?: "human" | "agent";
+}
+
 /** Someone else in the picker, with Issho: a person or an agent, and where they are. */
 export interface Peer {
   key: string;

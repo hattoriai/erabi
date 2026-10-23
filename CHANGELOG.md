@@ -36,8 +36,9 @@ and Erabi follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Editors of Masu's cells: `Erabi.cell_editor/2` and `erabiEditors()`.
 - With Issho (`Erabi.Issho`, `issho` and `user` attributes): who else
   has a picker open, the option each is on, a read-only peek of the list
-  where they are, and `Erabi.Issho.choose/5` for an agent to go through
-  the options before its change lands.
+  where they are, one at a time (the first to open the list holds the
+  picker's lock; `lock: false` for none), and `Erabi.Issho.choose/5` for
+  an agent to go through the options before its change lands.
 - `Erabi.Test`: `choose/3`, `choices/2`, `chosen/2`, `search/3`.
 - The Sumi theme (`erabi-sumi.css`), dark mode, forced colors, reduced
   motion.

@@ -31,8 +31,12 @@ defmodule Erabi.IsshoTest do
     :sys.get_state(view.pid)
   end
 
+  # The people of the last "erabi:people" that a LiveView pushed to its
+  # picker.
+  defp people(view), do: view |> last_push() |> then(&(&1 && &1.people))
+
   # The last "erabi:people" that a LiveView pushed to its picker.
-  defp people(view) do
+  defp last_push(view) do
     settle(view)
     Process.sleep(30)
     settle(view)
@@ -41,12 +45,15 @@ defmodule Erabi.IsshoTest do
 
   defp collect(%{proxy: {ref, _topic, _pid}} = view, last) do
     receive do
-      {^ref, {:push_event, "erabi:people", %{id: "status_picker", people: people}}} ->
-        collect(view, people)
+      {^ref, {:push_event, "erabi:people", %{id: "status_picker"} = payload}} ->
+        collect(view, payload)
     after
       50 -> last
     end
   end
+
+  defp place(view, at),
+    do: view |> with_target("#status_picker-issho") |> render_hook("erabi:place", %{"at" => at})
 
   test "the picker is the room's document, and the others see who has it open, on which option",
        %{room: room} do
@@ -107,6 +114,59 @@ defmodule Erabi.IsshoTest do
 
     assert people(ken) == []
     assert render(ken) =~ ~s(data-value="[&quot;done&quot;]")
+  end
+
+  test "the first to open the list holds the picker's lock, until they close it", %{room: room} do
+    ada = open(room, "ada")
+    ken = open(room, "ken")
+
+    place(ada, %{"open" => true, "option" => "todo"})
+    assert %{holder: %{"name" => "Ada"}} = last_push(ken)
+    assert %{holder: %{"mine" => true}} = last_push(ada)
+
+    # Ken opens it a moment later: Ada keeps it, on both screens.
+    place(ken, %{"open" => true})
+    assert %{holder: %{"name" => "Ada"}} = last_push(ken)
+    assert %{holder: %{"mine" => true}} = last_push(ada)
+
+    place(ada, nil)
+    assert %{holder: %{"mine" => true}} = last_push(ken)
+    place(ken, nil)
+    assert %{holder: nil} = last_push(ada)
+  end
+
+  test "an agent does not choose while someone holds the lock, and holds it while it chooses", %{
+    room: room
+  } do
+    ada = open(room, "ada")
+    place(ada, %{"open" => true})
+    _ = last_push(ada)
+
+    ctx = Context.new(ErabiTest.Issho, %{id: "agent:claude", name: "Claude", kind: :agent})
+    {:ok, participant} = Context.join(ctx, room)
+
+    assert {:error, {:locked, "ada"}} =
+             Erabi.Issho.choose(participant, room <> "/status", "done", fn -> flunk("chose") end)
+
+    place(ada, nil)
+    _ = last_push(ada)
+    test = self()
+
+    assert :ok =
+             Erabi.Issho.choose(participant, room <> "/status", "done", fn ->
+               send(test, {:during, last_push(ada)})
+               :ok
+             end)
+
+    assert_received {:during, %{holder: %{"name" => "Claude", "kind" => "agent"}}}
+    assert %{holder: nil} = last_push(ada)
+  end
+
+  test "lock: false shares where people are, and locks nothing", %{room: room} do
+    assert %Issho.Join{extra: %{lock: false}} =
+             Issho.Join.new!([instance: ErabiTest.Issho, document: room <> "/s", lock: false], [
+               :lock
+             ])
   end
 
   test "a picker with issho needs its user, said" do

@@ -5,7 +5,7 @@
 // <select>, or an <input>), so the form sees what it would without
 // JavaScript, with `input` and `change` events for phx-change.
 
-import { option, readConfig, readValue, Words, type Config, type Kind, type Option, type Peer } from "./config";
+import { option, readConfig, readValue, Words, type Config, type Holder, type Kind, type Option, type Peer } from "./config";
 import { el, icon, initials } from "./dom";
 import { Listbox, choosable, type Row } from "./listbox";
 import { fold, rank, score } from "./match";
@@ -53,6 +53,8 @@ export class Picker {
   private cleanups: (() => void)[] = [];
   /** With Issho: the others in the picker, and the peek of the list where one of them is. */
   private peers: Peer[] = [];
+  /** Who holds the picker's lock: while someone else does, the list does not open here. */
+  private holder: Holder | null = null;
   private peersEl!: HTMLElement;
   private peek: Popup | null = null;
   private peekList: Listbox | null = null;
@@ -394,6 +396,13 @@ export class Picker {
 
   open(): void {
     if (this.inactive || this.popup.open) return;
+    if (this.lockedBy()) {
+      this.say(this.words.t("choosing", { name: this.lockedBy()!.name ?? "" }));
+      this.field.classList.remove("erabi-refused");
+      void this.field.offsetWidth;
+      this.field.classList.add("erabi-refused");
+      return;
+    }
     this.popup.show();
     this.control.setAttribute("aria-expanded", "true");
     this.el.classList.add("erabi-open");
@@ -858,8 +867,22 @@ export class Picker {
     this.placeTimer = setTimeout(() => this.transport?.pushTo?.(target, "erabi:place", { at }), 80);
   }
 
-  /** The others in the picker (Erabi.Issho's "erabi:people"). */
-  setPeers(peers: Peer[]): void {
+  /** Someone else holds the picker's lock. */
+  private lockedBy(): Holder | null {
+    return this.holder && !this.holder.mine ? this.holder : null;
+  }
+
+  /** The others in the picker, and who holds its lock (Erabi.Issho's "erabi:people"). */
+  setPeers(peers: Peer[], holder: Holder | null = null): void {
+    this.holder = holder;
+    const locked = this.lockedBy();
+    this.field.classList.toggle("erabi-locked", !!locked);
+    if (this.input) this.input.readOnly = !!locked || !!this.config.readonly;
+    // Two opened it at once: the one who opened it first keeps it.
+    if (locked && this.popup.open) {
+      this.close(false);
+      this.say(this.words.t("choosing", { name: locked.name ?? "" }));
+    }
     const before = new Set(this.peers.filter((p) => p.at.open).map((p) => p.key));
     this.peers = peers;
     const choosing = peers.filter((p) => p.at.open);
