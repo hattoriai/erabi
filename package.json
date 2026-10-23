@@ -8,6 +8,10 @@
     ".": {
       "import": "./priv/static/erabi.esm.js",
       "require": "./priv/static/erabi.cjs.js"
+    },
+    "./color": {
+      "import": "./priv/static/erabi-color.esm.js",
+      "require": "./priv/static/erabi-color.cjs.js"
     }
   },
   "files": [

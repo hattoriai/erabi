@@ -35,7 +35,10 @@ Application.put_env(:erabi, ErabiDev.Endpoint,
   url: [host: "localhost"],
   watchers:
     if(watch?,
-      do: [erabi_esm: {Esbuild, :install_and_run, [:erabi_esm, ~w(--watch)]}],
+      do: [
+        erabi_esm: {Esbuild, :install_and_run, [:erabi_esm, ~w(--watch)]},
+        erabi_color_esm: {Esbuild, :install_and_run, [:erabi_color_esm, ~w(--watch)]}
+      ],
       else: []
     ),
   live_reload: [
@@ -222,7 +225,8 @@ defmodule ErabiDev.Layouts do
             "imports": {
               "phoenix": "/vendor/phoenix/phoenix.mjs",
               "phoenix_live_view": "/vendor/phoenix_live_view/phoenix_live_view.esm.js",
-              "erabi": "/assets/erabi.esm.js"
+              "erabi": "/assets/erabi.esm.js",
+              "erabi/color": "/assets/erabi-color.esm.js"
             }
           }
         </script>
@@ -230,6 +234,8 @@ defmodule ErabiDev.Layouts do
           import { Socket } from "phoenix"
           import { LiveSocket } from "phoenix_live_view"
           import { Erabi, mountErabi } from "erabi"
+          // ?nocolor leaves out the color picker's entry, as an app that forgot it.
+          if (!new URLSearchParams(location.search).has("nocolor")) await import("erabi/color")
 
           if (document.querySelector("[data-phx-main]")) {
             const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")

@@ -65,6 +65,9 @@ and Issho's actors, as they are. See [Options](options.md).
 
 ## `color_picker`
 
+The color picker is an entry of its own, which the app imports with the
+hook (`import "erabi/color"`): apps without one do not load it.
+
 A color: swatches of a palette, and, with `custom`, any color. The
 palette is Erabi's nine option colors by default, posted by name
 (`"blue"`) and drawn as the chips they make, so that a label's color

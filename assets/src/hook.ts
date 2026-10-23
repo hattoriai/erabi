@@ -4,15 +4,19 @@
 // (erabi:set, erabi:results, erabi:refresh, erabi:open, erabi:close,
 // erabi:focus) to the picker they name.
 
-import { ColorPicker } from "./colorpicker";
 import { readConfig } from "./config";
+import { isSeparate, kindOf, type AnyPicker } from "./kinds";
 import { Picker, type Transport } from "./picker";
 
-type AnyPicker = Picker | ColorPicker;
-
-/** The picker of an element, by its kind. */
-function make(el: HTMLElement, transport: Transport | null): AnyPicker {
-  return readConfig(el).kind === "color" ? new ColorPicker(el, transport) : new Picker(el, transport);
+/**
+ * The picker of an element, by its kind; none for a kind of an entry the
+ * app did not import, which stays the browser's <select>.
+ */
+function make(el: HTMLElement, transport: Transport | null): AnyPicker | undefined {
+  const kind = readConfig(el).kind;
+  if (!isSeparate(kind)) return new Picker(el, transport);
+  const Kind = kindOf(kind);
+  return Kind ? new Kind(el, transport) : undefined;
 }
 
 interface HookContext {
@@ -100,6 +104,7 @@ export function mountErabi(root: ParentNode = document): AnyPicker[] {
   for (const element of root.querySelectorAll<HTMLElement>('[phx-hook="Erabi"]')) {
     if (mounted.has(element)) continue;
     const picker = make(element, null);
+    if (!picker) continue;
     mounted.set(element, picker);
     pickers.push(picker);
   }

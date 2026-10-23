@@ -136,6 +136,12 @@ defmodule Mix.Tasks.Erabi.Install do
     A picker with `search` runs it in its LiveView: add `on_mount Erabi.Live`
     to the LiveView (or to its live_session).
 
+    The color picker is an entry of its own, so that pages without one do
+    not load it. If you use `color_picker` (or a color column in Masu), add
+    this line below the import of "erabi" in assets/js/app.js:
+
+        import "erabi/color"
+
     On a page without LiveView, the hook does not run. Import mountErabi
     in the page's script and call it after the page loads:
 

@@ -3,7 +3,7 @@ defmodule Mix.Tasks.Erabi.ReleaseCheckTest do
 
   alias Mix.Tasks.Erabi.ReleaseCheck
 
-  @files ~w(erabi.esm.js erabi.cjs.js erabi.css erabi-sumi.css)
+  @files ~w(erabi.esm.js erabi.cjs.js erabi-color.esm.js erabi-color.cjs.js erabi.css erabi-sumi.css)
 
   @moduletag :tmp_dir
 
@@ -16,7 +16,7 @@ defmodule Mix.Tasks.Erabi.ReleaseCheckTest do
     %{static: static, package: package}
   end
 
-  test "passes with the four built files and the same version", %{
+  test "passes with the six built files and the same version", %{
     static: static,
     package: package
   } do

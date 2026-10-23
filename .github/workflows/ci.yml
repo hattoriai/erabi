@@ -45,7 +45,7 @@ jobs:
       - name: Seed fake assets
         run: |
           mkdir -p priv/static
-          touch priv/static/erabi.esm.js priv/static/erabi.cjs.js priv/static/erabi.css priv/static/erabi-sumi.css
+          touch priv/static/erabi.esm.js priv/static/erabi.cjs.js priv/static/erabi-color.esm.js priv/static/erabi-color.cjs.js priv/static/erabi.css priv/static/erabi-sumi.css
 
       - run: mix format --check-formatted
 
@@ -104,7 +104,7 @@ jobs:
       - name: Seed fake assets
         run: |
           mkdir -p priv/static
-          touch priv/static/erabi.esm.js priv/static/erabi.cjs.js priv/static/erabi.css priv/static/erabi-sumi.css
+          touch priv/static/erabi.esm.js priv/static/erabi.cjs.js priv/static/erabi-color.esm.js priv/static/erabi-color.cjs.js priv/static/erabi.css priv/static/erabi-sumi.css
 
       # mix.lock has the newest Phoenix and LiveView: resolve the oldest.
       - run: mix deps.update phoenix phoenix_live_view

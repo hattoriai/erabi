@@ -6,12 +6,14 @@
 // in its native control, as the other pickers do.
 
 import { clampChroma, contrast, hexToRgb, maxChroma, normalizeHex, oklchToRgb, rgbToHex, rgbToOklch, type Oklch } from "./color";
-import { option, readConfig, readValue, Words, type Config, type Option } from "./config";
-import { el, icon } from "./dom";
-import { writeNative } from "./native";
-import { Popup } from "./popup";
-import { checkValue } from "./rules";
+import { internal } from "erabi";
+import type { Config, Option, Words } from "./config";
+import type { AnyPicker } from "./kinds";
 import type { Transport } from "./picker";
+import type { Popup } from "./popup";
+
+// The main bundle's, so that a page has one copy (see color-entry.ts).
+const { option, readConfig, readValue, el, icon, writeNative, checkValue } = internal;
 
 const PALETTE = new Set(["gray", "brown", "orange", "yellow", "green", "blue", "purple", "pink", "red"]);
 const RECENT_KEY = "erabi-colors-recent";
@@ -42,7 +44,7 @@ interface EyeDropperResult {
   sRGBHex: string;
 }
 
-export class ColorPicker {
+export class ColorPicker implements AnyPicker {
   readonly id: string;
   private el: HTMLElement;
   private transport: Transport | null;
@@ -75,7 +77,7 @@ export class ColorPicker {
     this.transport = transport;
     this.config = readConfig(el);
     this.id = this.config.id ?? el.id;
-    this.words = new Words(this.config.messages ?? {}, this.config.locale ?? "en");
+    this.words = new internal.Words(this.config.messages ?? {}, this.config.locale ?? "en");
     this.native = el.querySelector<HTMLSelectElement | HTMLInputElement>('[data-part="value"]');
     this.options = (this.config.options ?? []).map(option);
     this.value = readValue(el)[0] ?? null;
@@ -142,7 +144,7 @@ export class ColorPicker {
     this.swatches = el("div", { class: "erabi-swatches", role: "listbox", "aria-label": this.words.t("swatches") });
     body.append(this.swatches);
     if (this.canCustom) body.append(this.buildCustom());
-    this.popup = new Popup(this.field, body, () => this.close(false), { width: 272, maxHeight: 520 });
+    this.popup = new internal.Popup(this.field, body, () => this.close(false), { width: 272, maxHeight: 520 });
 
     this.live = el("div", { class: "erabi-live", "aria-live": "polite", "aria-atomic": "true" });
     this.el.append(this.field, body, this.live);
@@ -278,6 +280,16 @@ export class ColorPicker {
     this.field.setAttribute("aria-expanded", "false");
     this.el.classList.remove("erabi-open");
     if (restore) this.field.focus();
+    this.el.dispatchEvent(new CustomEvent("erabi:closed", { detail: { id: this.id } }));
+  }
+
+  /** Starts with what a person typed on a grid's cell: in the hex box, with `custom`. */
+  type(text: string): void {
+    if (!this.hex) return;
+    this.open();
+    this.hex.value = text.startsWith("#") ? text : `#${text}`;
+    this.hex.focus();
+    this.hex.setSelectionRange(this.hex.value.length, this.hex.value.length);
   }
 
   // -- Values ---------------------------------------------------------------

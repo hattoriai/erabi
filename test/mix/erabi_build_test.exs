@@ -6,7 +6,7 @@ defmodule Mix.Tasks.Erabi.BuildTest do
 
   @root Path.expand("../..", __DIR__)
   @static Path.join(@root, "priv/static")
-  @files ~w(erabi.esm.js erabi.cjs.js erabi.css erabi-sumi.css)
+  @files ~w(erabi.esm.js erabi.cjs.js erabi-color.esm.js erabi-color.cjs.js erabi.css erabi-sumi.css)
   @exports ~w(Erabi cellEditor erabiEditors mountErabi)
 
   @moduletag :build
@@ -48,7 +48,7 @@ defmodule Mix.Tasks.Erabi.BuildTest do
     end
   end
 
-  test "priv/static holds only the four files of the package" do
+  test "priv/static holds only the six files of the package" do
     assert @static |> File.ls!() |> Enum.sort() == Enum.sort(@files)
   end
 
@@ -121,7 +121,29 @@ defmodule Mix.Tasks.Erabi.BuildTest do
       {output, status} = System.cmd("node", ["-e", script], cd: @root, stderr_to_stdout: true)
 
       assert status == 0, "node could not require erabi.cjs.js:\n" <> output
-      assert JSON.decode!(output) == @exports
+      assert JSON.decode!(output) == Enum.sort(["internal" | @exports])
+    end
+
+    test "the color entry takes the rest from the package, not a copy of its own" do
+      script = """
+      const color = require("erabi/color");
+      process.stdout.write(JSON.stringify(Object.keys(color)));
+      """
+
+      # The package resolves by its name from the directory above it.
+      {output, status} =
+        System.cmd("node", ["-e", script],
+          cd: @root,
+          env: [{"NODE_PATH", Path.dirname(@root)}],
+          stderr_to_stdout: true
+        )
+
+      assert status == 0, "node could not require erabi/color:\n" <> output
+      assert JSON.decode!(output) == ["ColorPicker"]
+
+      esm = File.read!(Path.join(@static, "erabi-color.esm.js"))
+      assert esm =~ ~r/from"erabi"/
+      refute esm =~ "erabi-popup\""
     end
   end
 end

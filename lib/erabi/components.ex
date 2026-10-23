@@ -125,7 +125,7 @@ defmodule Erabi.Components do
       cond do
         assigns.palette -> assigns.palette
         assigns.options != [] -> assigns.options
-        true -> default_palette(messages)
+        true -> Option.palette(messages)
       end
 
     rules =
@@ -137,14 +137,6 @@ defmodule Erabi.Components do
     |> assign(options: palette, rules: rules, create: nil)
     |> prepare(:color, false)
     |> picker()
-  end
-
-  defp default_palette(messages) do
-    for color <- Option.colors() do
-      name = Atom.to_string(color)
-      key = "color" <> String.capitalize(name)
-      %{value: name, label: messages[key], color: color}
-    end
   end
 
   defp rule_list(nil), do: []

@@ -41,8 +41,9 @@ date. It gives your app:
 * `Erabi.Test`, to choose and search in `Phoenix.LiveViewTest` with no
   browser.
 
-The pickers are a prebuilt JavaScript bundle in the Hex package, 16 KB
-gzipped for every kind. Your app does not run Node.js for it: you add the
+The pickers are a prebuilt JavaScript bundle in the Hex package, 13 KB
+gzipped, and 6 KB more for the color picker, in an entry of its own
+(`erabi/color`) for the apps that have one. Your app does not run Node.js for it: you add the
 hook and one style sheet.
 
 ## What the pickers do
@@ -102,6 +103,15 @@ const liveSocket = new LiveSocket("/live", Socket, {
   params: {_csrf_token: csrfToken},
   hooks: {...colocatedHooks, Erabi},
 })
+```
+
+If you use `color_picker` (or a color column in Masu), import its entry
+too. It is a bundle of its own (6 KB gzipped), so that apps without a
+color picker do not load it; without the import, a color picker stays
+the browser's `<select>`, and the console says what is missing:
+
+```js
+import "erabi/color"
 ```
 
 Import the style sheet in `assets/css/app.css` (and the Sumi theme, if you

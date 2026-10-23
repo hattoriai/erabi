@@ -81,6 +81,8 @@ defmodule Erabi.MixProject do
         lib
         priv/static/erabi.esm.js
         priv/static/erabi.cjs.js
+        priv/static/erabi-color.esm.js
+        priv/static/erabi-color.cjs.js
         priv/static/erabi.css
         priv/static/erabi-sumi.css
         package.json

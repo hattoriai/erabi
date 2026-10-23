@@ -17,10 +17,15 @@ rules and words resolved on the server:
 </.data_grid>
 ```
 
-The kinds are `:select`, `:multi_select`, `:combobox`, `:tags` and
-`:person` (with `multiple: true` for several people), and the options
-those of the components: `options`, `rules` and its shortcuts, `filter`,
-`me`, `placeholder`, `locale` and `messages`.
+The kinds are `:select`, `:multi_select`, `:combobox`, `:tags`,
+`:person` (with `multiple: true` for several people) and `:color`, and
+the options those of the components: `options`, `rules` and its
+shortcuts, `filter`, `me`, `placeholder`, `locale` and `messages`; and
+for `:color`, `palette`, `custom` and `contrast`:
+
+```heex
+<:col field={:color} editor={Erabi.cell_editor(:color, custom: true)} />
+```
 
 ## The browser
 
@@ -29,11 +34,18 @@ Register the editors once, in your app's JavaScript:
 ```js
 import { configure } from "masu"
 import { erabiEditors } from "erabi"
+import "erabi/color" // for color columns
 
 configure({ editors: erabiEditors() })
 ```
 
+Without `erabi/color`, a color column is a select of its palette.
+
 ## How it edits
+
+A color is saved as its popup closes (a swatch, Enter, or a click away),
+so that a drag in its area saves once; closed with no change, the edit
+is cancelled. A letter that opened the editor goes to its hex box.
 
 The picker draws over the cell, with its list open; a letter that opened
 the editor is typed into it. A picker of one value saves it as it is

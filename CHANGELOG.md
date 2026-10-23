@@ -25,7 +25,12 @@ and Erabi follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   app's colors), and with `custom` any color as `#rrggbb`: an OKLCH area
   of lightness and chroma that holds only colors a screen shows, a hue
   slider, a hex box, the eyedropper, recent colors, and the contrast
-  with a background (`contrast`).
+  with a background (`contrast`). It is an entry of its own
+  (`import "erabi/color"`), so that apps without one do not load it;
+  without the import it stays the browser's `<select>`, and says so in
+  the console.
+- Color columns in Masu: `Erabi.cell_editor(:color, ...)`, saved as the
+  popup closes; a select of the palette without `erabi/color`.
 - Tags typed with Enter or a comma, and "Create “…”" under the rules.
 - `Erabi.Rules`, the same in the browser and in
   `Erabi.Changeset.validate_choice/4`: required, counts, creation,

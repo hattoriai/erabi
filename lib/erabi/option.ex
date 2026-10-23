@@ -78,6 +78,21 @@ defmodule Erabi.Option do
   def colors, do: @colors
 
   @doc """
+  The option colors as the options of a color picker, named in a
+  language's words (`Erabi.Messages`): its default palette.
+
+      iex> Erabi.Option.palette(%{"colorBlue" => "Bleu"}) |> Enum.at(5)
+      %{value: "blue", label: "Bleu", color: :blue}
+  """
+  @spec palette(%{String.t() => String.t()}) :: [map()]
+  def palette(messages) do
+    for color <- @colors do
+      name = Atom.to_string(color)
+      %{value: name, label: messages["color" <> String.capitalize(name)] || name, color: color}
+    end
+  end
+
+  @doc """
   An option from a map or a keyword list of its keys (see the moduledoc).
   Raises an `ArgumentError` that says what is wrong.
 

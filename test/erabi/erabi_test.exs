@@ -17,4 +17,22 @@ defmodule ErabiTest do
     assert {"erabi_person", %{"me" => "7", "multiple" => true}} =
              Erabi.cell_editor(:person, options: [%{id: 7, name: "Ada"}], me: 7, multiple: true)
   end
+
+  test "a color column: the palette in the column's words, and custom colors as #rrggbb" do
+    assert {"erabi_color", options} = Erabi.cell_editor(:color, locale: "de")
+    assert length(options["options"]) == 9
+    assert %{"v" => "green", "l" => "Grün", "c" => "green"} in options["options"]
+    assert options["rules"] == %{}
+
+    assert {"erabi_color", options} =
+             Erabi.cell_editor(:color,
+               palette: [{"Ocean", "#3f6f8f"}],
+               custom: true,
+               contrast: "#ffffff"
+             )
+
+    assert options["options"] == [%{"v" => "#3f6f8f", "l" => "Ocean"}]
+    assert options["rules"] == %{"create" => true, "pattern" => "#[0-9a-fA-F]{6}"}
+    assert options["contrast"] == "#ffffff"
+  end
 end

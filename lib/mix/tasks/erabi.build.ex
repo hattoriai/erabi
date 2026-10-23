@@ -18,11 +18,12 @@ defmodule Mix.Tasks.Erabi.Build do
     2. Empties `priv/static`, so that it holds only the files of this
        build.
     3. Runs esbuild (the `esbuild` Mix package) with the `:erabi_esm` and
-       `:erabi_cjs` profiles.
+       `:erabi_cjs` profiles, and `:erabi_color_esm` and `:erabi_color_cjs`
+       for the color picker's entry (`erabi/color`).
     4. Copies `assets/css/erabi.css` and `assets/css/erabi-sumi.css` to
        `priv/static/`.
 
-  After the task, `priv/static` holds exactly these four files, which are
+  After the task, `priv/static` holds exactly these six files, which are
   the files of the Hex package.
 
   It needs `npm` on the path and the `:esbuild` dependency, which is
@@ -36,7 +37,7 @@ defmodule Mix.Tasks.Erabi.Build do
   @assets "assets"
   @static "priv/static"
   @lock_hash "node_modules/.erabi-lock-sha256"
-  @profiles [:erabi_esm, :erabi_cjs]
+  @profiles [:erabi_esm, :erabi_cjs, :erabi_color_esm, :erabi_color_cjs]
   @stylesheets ["erabi.css", "erabi-sumi.css"]
 
   @impl Mix.Task
