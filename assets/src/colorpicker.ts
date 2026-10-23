@@ -246,7 +246,9 @@ export class ColorPicker implements AnyPicker {
     });
     on(this.el, "focusout", (event) => {
       const next = event.relatedTarget as Node | null;
-      if (next && this.el.contains(next)) return;
+      // A sheet stays as the focus goes (a phone's keyboard put away, a tap
+      // in it): Done, the dimmed page, a swipe or a choice closes it.
+      if ((next && this.el.contains(next)) || (this.popup.open && this.popup.sheet)) return;
       queueMicrotask(() => {
         if (!this.el.contains(document.activeElement)) this.close(false);
       });

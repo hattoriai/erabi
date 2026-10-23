@@ -217,7 +217,8 @@ export class Picker {
       popup.append(el("div", { class: "erabi-filter-box" }, icon("search"), this.filterInput));
     }
     popup.append(this.list.el);
-    this.popup = new Popup(this.field, popup, () => this.close(false), sheetOf(config, this.words));
+    // A sheet closed by Done, its dimmed page or a swipe is left, as a focus that goes.
+    this.popup = new Popup(this.field, popup, () => (this.popup.sheet ? this.leave() : this.close(false)), sheetOf(config, this.words));
 
     this.live = el("div", { class: "erabi-live", "aria-live": "polite", "aria-atomic": "true" });
     this.el.append(this.field, popup, this.live);
@@ -261,7 +262,9 @@ export class Picker {
     }
     on(this.el, "focusout", (event) => {
       const next = event.relatedTarget as Node | null;
-      if (next && this.el.contains(next)) return;
+      // A sheet stays as the focus goes (a phone's keyboard put away, a tap
+      // in it): Done, the dimmed page, a swipe or a choice closes it.
+      if ((next && this.el.contains(next)) || (this.popup.open && this.popup.sheet)) return;
       // The focus went into the popup's own box (top layer, still inside the element).
       queueMicrotask(() => {
         if (this.el.contains(document.activeElement)) return;

@@ -6,6 +6,8 @@ const { defaultBrowserType: _browser, ...phone } = devices["iPhone 13"];
 
 test.describe("sheets on a phone", () => {
   test.use(phone);
+  // Playwright emulates a phone (isMobile) in Chromium and WebKit, not in Firefox.
+  test.skip(({ browserName }) => browserName === "firefox", "Playwright cannot emulate a phone in Firefox");
 
   test("a select is a sheet with its name and Done; a tap on a row chooses", async ({ page }) => {
     await openPage(page);
@@ -61,6 +63,13 @@ test.describe("sheets on a phone", () => {
     await expectPosted(page, "city", "Lisbon");
     await expect(sheet).toBeHidden();
     await expect(picker(page, "task_city_picker").locator(".erabi-field .erabi-input")).toHaveValue("Lisbon");
+
+    // Typed and closed with Done: the text that is no option goes, as a focus that leaves.
+    await input.tap();
+    await page.keyboard.type("zz");
+    await sheet.getByRole("button", { name: "Done" }).tap();
+    await expect(sheet).toBeHidden();
+    await expect(picker(page, "task_city_picker").locator(".erabi-field .erabi-input")).toHaveValue("Lisbon");
   });
 
   test("an emoji picker is a sheet too", async ({ page }) => {
@@ -68,6 +77,10 @@ test.describe("sheets on a phone", () => {
     await picker(page, "task_page_icon_picker").locator(".erabi-field").tap();
     const sheet = picker(page, "task_page_icon_picker").locator(".erabi-popup");
     await expect(sheet).toHaveClass(/erabi-sheet/);
+    // The keyboard put away (WebKit also takes the focus on a tap): the sheet stays.
+    await expect(sheet.getByRole("option", { name: "grinning face", exact: true })).toBeVisible();
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await expect(sheet).toBeVisible();
     await sheet.getByRole("option", { name: "grinning face", exact: true }).tap();
     await expectPosted(page, "page_icon", "😀");
   });
