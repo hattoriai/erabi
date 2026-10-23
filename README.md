@@ -47,7 +47,7 @@ date. It gives your app:
 * `Erabi.Test`, to choose and search in `Phoenix.LiveViewTest` with no
   browser.
 
-The pickers are a prebuilt JavaScript bundle in the Hex package, 13 KB
+The pickers are a prebuilt JavaScript bundle in the Hex package, 14 KB
 gzipped; the color picker (6 KB) and the emoji and icon pickers (7 KB,
 and their emoji as the picker first opens) are entries of their own, for
 the apps that have them. Your app does not run Node.js for it: you add the
