@@ -38,6 +38,9 @@ export default defineConfig({
     // the dev pages give en-GB.
     locale: "en-GB",
     timezoneId: "Europe/Lisbon",
+    // No popup slides in: a test sees it where it stays, at once, and
+    // never measures it on its way (the pickers honour reduced motion).
+    reducedMotion: "reduce",
     // A failed test keeps its trace and a screenshot, in test-results/.
     trace: "retain-on-failure",
     screenshot: "only-on-failure",

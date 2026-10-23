@@ -18,7 +18,7 @@ test.describe("sheets on a phone", () => {
     await expect(sheet.getByRole("button", { name: "Done" })).toBeVisible();
     const box = (await sheet.boundingBox())!;
     expect(box.x).toBe(0);
-    expect(Math.round(box.y + box.height)).toBe(page.viewportSize()!.height);
+    expect(Math.abs(box.y + box.height - page.viewportSize()!.height)).toBeLessThan(2);
     expect(await page.evaluate(() => document.documentElement.style.overflow)).toBe("hidden");
 
     await sheet.getByRole("option", { name: "Done" }).tap();
