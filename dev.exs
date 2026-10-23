@@ -184,7 +184,8 @@ defmodule ErabiDev.Layouts do
   use Phoenix.Component
 
   def root(assigns) do
-    assigns = assign(assigns, :sumi, assigns.conn.params["theme"] == "sumi")
+    # A controller's assigns have no change tracking: put, not assign.
+    assigns = Map.put(assigns, :sumi, assigns.conn.params["theme"] == "sumi")
 
     ~H"""
     <!DOCTYPE html>
@@ -333,7 +334,7 @@ defmodule ErabiDev.PickersLive do
     </div>
     <p>Picked: <span id="picked">{inspect(@picked)}</span></p>
     <h2>Posted</h2>
-    <pre id="posted">{JSON.encode!(@posted)}</pre>
+    <pre id="posted" data-json={JSON.encode!(@posted)}>{JSON.encode!(@posted)}</pre>
     """
   end
 
@@ -414,6 +415,7 @@ defmodule ErabiDev.Router do
   import Phoenix.LiveView.Router
 
   pipeline :browser do
+    plug(:accepts, ["html"])
     plug(:fetch_session)
     plug(:fetch_live_flash)
     plug(:protect_from_forgery)

@@ -8,7 +8,7 @@ defmodule Erabi.Test do
       test "labels a task", %{conn: conn} do
         {:ok, view, _html} = live(conn, ~p"/tasks/1")
 
-        assert options(view, "task_labels_picker") == ["Bug", "Feature", "Docs"]
+        assert choices(view, "task_labels_picker") == ["Bug", "Feature", "Docs"]
         html = choose(view, "task_labels_picker", ["bug", "docs"])
         assert html =~ "2 labels"
       end
@@ -76,13 +76,13 @@ defmodule Erabi.Test do
 
   @doc """
   The labels of a picker's options, in order, as its list shows them
-  before people type.
+  before people type. (Not `options/2`: `Phoenix.ConnTest` has one.)
   """
-  @spec options(struct(), String.t()) :: [String.t()]
-  def options(view, picker_id) do
+  @spec choices(struct(), String.t()) :: [String.t()]
+  def choices(view, picker_id) do
     picker_id = String.trim_leading(picker_id, "#")
     html = view |> LiveViewTest.render() |> LazyHTML.from_fragment()
-    [json] = html |> picker!(picker_id, "options/2") |> LazyHTML.attribute("data-config")
+    [json] = html |> picker!(picker_id, "choices/2") |> LazyHTML.attribute("data-config")
     json |> JSON.decode!() |> Map.get("options", []) |> Enum.map(& &1["l"])
   end
 

@@ -127,59 +127,17 @@ defmodule Erabi.Components do
   end
 
   defp prepare(assigns, kind, multiple) when kind in @kinds do
-    field = assigns.field
     rules = rules(assigns)
     options = Option.list(assigns.options)
-    known = MapSet.new(options, &Option.param(&1.value))
-
-    selected =
-      assigns.selected
-      |> Option.list()
-      |> Enum.reject(&MapSet.member?(known, Option.param(&1.value)))
-
-    raw = if field, do: field.value, else: assigns.value
-    values = raw |> value_list(multiple) |> Option.params()
-    values = if multiple, do: values, else: Enum.take(values, 1)
-
-    base_name =
-      assigns.name || (field && field.name) ||
-        raise ArgumentError, "Erabi: a picker needs a `field` or a `name`"
-
-    name = if multiple, do: base_name <> "[]", else: base_name
-    input_id = (field && field.id) || assigns.id || base_name
-    id = assigns.id || input_id <> "_picker"
+    selected = selected(assigns.selected, options)
+    values = values(assigns, multiple)
+    %{id: id, input_id: input_id, name: name} = names(assigns, multiple)
     locale = assigns.locale || Application.get_env(:erabi, :locale, "en")
     messages = Messages.for_locale(locale, assigns.messages || %{})
-    label = assigns.label || (!assigns.label_id && field && humanize(field.field))
-    me = assigns[:me] && Option.param(assigns[:me])
-
-    {described_by, rest} = Map.pop(assigns.rest, :"aria-describedby")
-    {aria_invalid, rest} = Map.pop(rest, :"aria-invalid")
-
-    invalid =
-      aria_invalid in [true, "true"] or
-        (field != nil and field.errors != [] and Phoenix.Component.used_input?(field))
+    label = label(assigns)
+    {described_by, invalid, rest} = aria(assigns)
 
     register_search(assigns.search, id, assigns.async)
-
-    chosen = MapSet.new(values)
-
-    by_param =
-      Map.new(options ++ selected, fn option -> {Option.param(option.value), option} end)
-
-    native_options =
-      (options ++ selected ++ Enum.map(values -- Map.keys(by_param), &Option.new(value: &1)))
-      |> Enum.map(fn option ->
-        param = Option.param(option.value)
-
-        %{
-          param: param,
-          label: option.label,
-          group: option.group,
-          selected: MapSet.member?(chosen, param),
-          disabled: option.disabled != false
-        }
-      end)
 
     config = %{
       "v" => 1,
@@ -201,13 +159,12 @@ defmodule Erabi.Components do
       "clearable" => clearable?(assigns.clearable, rules, multiple),
       "disabled" => assigns.disabled,
       "readonly" => assigns.readonly,
-      "me" => me,
+      "me" => assigns[:me] && Option.param(assigns[:me]),
       "onChange" => assigns.on_change,
       "icons" => assigns.icon != []
     }
 
-    assigns
-    |> assign(
+    assign(assigns,
       kind: kind,
       multiple: multiple,
       id: id,
@@ -221,14 +178,82 @@ defmodule Erabi.Components do
       config: JSON.encode!(reject_nils(config)),
       value_json: JSON.encode!(values),
       empty: assigns.placeholder || messages["choose"],
-      groups: native_options |> Enum.chunk_by(& &1.group) |> Enum.map(&{hd(&1).group, &1}),
-      icons:
-        if(assigns.icon == [],
-          do: [],
-          else: options |> Enum.map(& &1.icon) |> Enum.reject(&is_nil/1) |> Enum.uniq()
-        )
+      groups: native_groups(options ++ selected, values),
+      icons: icons(assigns.icon, options)
     )
   end
+
+  # The options of chosen values that are not among the options.
+  defp selected(selected, options) do
+    known = MapSet.new(options, &Option.param(&1.value))
+    selected |> Option.list() |> Enum.reject(&MapSet.member?(known, Option.param(&1.value)))
+  end
+
+  # The values as the picker posts them: texts, one at most unless multiple.
+  defp values(assigns, multiple) do
+    raw = if assigns.field, do: assigns.field.value, else: assigns.value
+    values = raw |> value_list(multiple) |> Option.params()
+    if multiple, do: values, else: Enum.take(values, 1)
+  end
+
+  defp names(%{field: field} = assigns, multiple) do
+    base =
+      assigns.name || (field && field.name) ||
+        raise ArgumentError, "Erabi: a picker needs a `field` or a `name`"
+
+    input_id = (field && field.id) || assigns.id || base
+
+    %{
+      id: assigns.id || input_id <> "_picker",
+      input_id: input_id,
+      name: if(multiple, do: base <> "[]", else: base)
+    }
+  end
+
+  defp label(%{label: nil, label_id: nil, field: %{field: field}}),
+    do: Phoenix.Naming.humanize(field)
+
+  defp label(assigns), do: assigns.label
+
+  # aria-describedby and aria-invalid go to the field, not the element.
+  defp aria(%{field: field, rest: rest}) do
+    {described_by, rest} = Map.pop(rest, :"aria-describedby")
+    {aria_invalid, rest} = Map.pop(rest, :"aria-invalid")
+
+    invalid =
+      aria_invalid in [true, "true"] or
+        (field != nil and field.errors != [] and Phoenix.Component.used_input?(field))
+
+    {described_by, invalid, rest}
+  end
+
+  # The options of the native select, by group; a chosen value that is no
+  # option is one too, so that it posts.
+  defp native_groups(options, values) do
+    chosen = MapSet.new(values)
+    params = MapSet.new(options, &Option.param(&1.value))
+    extra = values |> Enum.reject(&MapSet.member?(params, &1)) |> Enum.map(&Option.new(value: &1))
+
+    (options ++ extra)
+    |> Enum.map(fn option ->
+      param = Option.param(option.value)
+
+      %{
+        param: param,
+        label: option.label,
+        group: option.group,
+        selected: MapSet.member?(chosen, param),
+        disabled: option.disabled != false
+      }
+    end)
+    |> Enum.chunk_by(& &1.group)
+    |> Enum.map(&{hd(&1).group, &1})
+  end
+
+  defp icons([], _options), do: []
+
+  defp icons(_slot, options),
+    do: options |> Enum.map(& &1.icon) |> Enum.reject(&is_nil/1) |> Enum.uniq()
 
   defp rules(assigns) do
     shortcuts =
@@ -257,8 +282,6 @@ defmodule Erabi.Components do
 
   defp clearable?(nil, rules, multiple), do: not multiple and not rules.required
   defp clearable?(clearable, _rules, _multiple), do: clearable
-
-  defp humanize(field), do: Phoenix.Naming.humanize(field)
 
   defp reject_nils(map),
     do: map |> Enum.reject(fn {_key, value} -> is_nil(value) or value == false end) |> Map.new()

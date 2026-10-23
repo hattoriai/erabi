@@ -83,7 +83,7 @@ defmodule Erabi.Changeset do
   end
 
   defp known(nil, _values), do: :any
-  defp known(fun, values) when is_function(fun, 1), do: fun |> apply([values]) |> Option.params()
+  defp known(fun, values) when is_function(fun, 1), do: values |> fun.() |> Option.params()
   defp known(options, _values), do: options |> Option.list() |> Enum.map(&Option.param(&1.value))
 
   defp add(changeset, field, {kind, keys}, opts) do

@@ -63,6 +63,18 @@ export class Picker {
     if (this.config.search) this.search = new Search(this.id, transport ? (event, payload, reply) => transport.push(event, payload, reply) : null, (results) => this.onResults(results));
     this.build();
     this.render();
+    if (this.native) {
+      // The native control posts the value; the field is what people use.
+      this.native.setAttribute("aria-hidden", "true");
+      this.native.tabIndex = -1;
+      const invalid = (event: Event) => {
+        event.preventDefault();
+        this.control.focus();
+        this.say(this.words.t("required"));
+      };
+      this.native.addEventListener("invalid", invalid);
+      this.cleanups.push(() => this.native?.removeEventListener("invalid", invalid));
+    }
     el.classList.add("erabi-ready");
   }
 
@@ -315,6 +327,14 @@ export class Picker {
       }
       const chosen = new Set(this.value);
       for (const o of Array.from(native.options)) o.selected = o.value === "" ? chosen.size === 0 && !native.multiple : chosen.has(o.value);
+      // A form posts a select's values in the order of its options: the
+      // chosen ones go last, in the order people chose them.
+      if (native.multiple) {
+        for (const value of this.value) {
+          const o = Array.from(native.options).find((x) => x.value === value);
+          if (o) native.append(o);
+        }
+      }
     } else {
       native.value = this.value[0] ?? "";
     }
@@ -575,6 +595,10 @@ export class Picker {
       case " ":
         if (inBox) return;
         event.preventDefault();
+        if (this.popup.open && Date.now() - this.typedAt < TYPEAHEAD) {
+          this.typeahead(" ");
+          return;
+        }
         if (!open) this.open();
         else {
           const row = this.list.rows[this.list.active];

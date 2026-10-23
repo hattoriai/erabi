@@ -158,12 +158,20 @@ defmodule Erabi.Rules do
     values = Enum.reject(values, &(&1 == ""))
     count = length(values)
 
+    with :ok <- check_count(rules, count) do
+      case duplicate(values) do
+        nil -> check_new(rules, values, known)
+        duplicate -> {:error, {:duplicate, value: duplicate}}
+      end
+    end
+  end
+
+  defp check_count(rules, count) do
     cond do
       rules.required and count == 0 -> {:error, {:required, []}}
       rules.min != nil and count > 0 and count < rules.min -> {:error, {:too_few, min: rules.min}}
       rules.max != nil and count > rules.max -> {:error, {:too_many, max: rules.max}}
-      duplicate = duplicate(values) -> {:error, {:duplicate, value: duplicate}}
-      true -> check_new(rules, values, known)
+      true -> :ok
     end
   end
 

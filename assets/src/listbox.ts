@@ -55,7 +55,7 @@ export class Listbox {
       if (!target) return;
       const row = this.rows[Number(target.dataset.row)];
       if (row?.type === "status" && row.retry) return this.onRetry();
-      if (row && choosable(row) && !(row.type === "option" && row.blocked)) this.onPick(row);
+      if (row && choosable(row)) this.onPick(row);
     });
     this.el.addEventListener("pointermove", (event) => {
       const target = (event.target as Element).closest<HTMLElement>("[data-row]");

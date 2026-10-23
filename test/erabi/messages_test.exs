@@ -1,12 +1,14 @@
 defmodule Erabi.MessagesTest do
   use ExUnit.Case, async: true
 
+  alias Erabi.Messages.Translations
+
   doctest Erabi.Messages
 
   test "every language has every key, and the placeholders of English" do
-    english = Erabi.Messages.Translations.english()
+    english = Translations.english()
 
-    for {language, words} <- Erabi.Messages.Translations.all() do
+    for {language, words} <- Translations.all() do
       assert Map.keys(words) -- Map.keys(english) == [], "#{language} has unknown keys"
       assert Map.keys(english) -- Map.keys(words) == [], "#{language} lacks keys"
 
