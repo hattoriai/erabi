@@ -5,7 +5,7 @@
 // <select>, or an <input>), so the form sees what it would without
 // JavaScript, with `input` and `change` events for phx-change.
 
-import { option, readConfig, readValue, Words, type Config, type Holder, type Kind, type Option, type Peer } from "./config";
+import { option, readConfig, readValue, sheetOf, Words, type Config, type Holder, type Kind, type Option, type Peer } from "./config";
 import { el, icon, initials } from "./dom";
 import { Listbox, choosable, type Row } from "./listbox";
 import { writeNative } from "./native";
@@ -34,6 +34,8 @@ export class Picker {
   private field!: HTMLElement;
   private control!: HTMLElement;
   private input: HTMLInputElement | null = null;
+  /** Where the box to type in was, while a sheet holds it. */
+  private inputHome: Comment | null = null;
   private filterInput: HTMLInputElement | null = null;
   private values!: HTMLElement;
   private clearButton: HTMLButtonElement | null = null;
@@ -215,7 +217,7 @@ export class Picker {
       popup.append(el("div", { class: "erabi-filter-box" }, icon("search"), this.filterInput));
     }
     popup.append(this.list.el);
-    this.popup = new Popup(this.field, popup, () => this.close(false));
+    this.popup = new Popup(this.field, popup, () => this.close(false), sheetOf(config, this.words));
 
     this.live = el("div", { class: "erabi-live", "aria-live": "polite", "aria-atomic": "true" });
     this.el.append(this.field, popup, this.live);
@@ -381,9 +383,17 @@ export class Picker {
       this.field.classList.add("erabi-refused");
       return;
     }
+    if (this.popup.wantsSheet() !== this.popup.sheet) this.list.remeasure();
     this.popup.show();
     this.control.setAttribute("aria-expanded", "true");
     this.el.classList.add("erabi-open");
+    // In a sheet, the box to type in goes with it, above the keyboard.
+    if (this.popup.sheet && this.input && this.popup.slot) {
+      this.inputHome = document.createComment("erabi-input");
+      this.input.replaceWith(this.inputHome);
+      this.popup.slot.append(this.input);
+      this.input.focus();
+    }
     if (this.filterInput) {
       this.filterInput.value = this.query;
       this.filterInput.focus();
@@ -398,6 +408,12 @@ export class Picker {
   /** Closes the list; `restore` gives the focus back to the field. */
   close(restore: boolean): void {
     if (!this.popup.open) return;
+    if (this.inputHome && this.input) {
+      const focused = document.activeElement === this.input;
+      this.inputHome.replaceWith(this.input);
+      this.inputHome = null;
+      if (focused && restore) this.input.focus();
+    }
     this.popup.hide();
     this.control.setAttribute("aria-expanded", "false");
     this.control.removeAttribute("aria-activedescendant");
@@ -896,7 +912,7 @@ export class Picker {
       this.peekList.el.removeAttribute("role");
       this.peekList.el.removeAttribute("tabindex");
       this.el.append(body);
-      this.peek = new Popup(this.field, body, () => {});
+      this.peek = new Popup(this.field, body, () => {}, { sheet: "never" });
     }
     const saved = this.query;
     this.query = "";

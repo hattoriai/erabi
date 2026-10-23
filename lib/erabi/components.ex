@@ -298,7 +298,8 @@ defmodule Erabi.Components do
       "issho" => issho_join && %{"target" => "##{id}-issho"},
       "contrast" => assigns[:contrast],
       "emojiData" => assigns[:emoji_url],
-      "noTones" => assigns[:tones] == false
+      "noTones" => assigns[:tones] == false,
+      "sheet" => sheet(assigns.sheet)
     }
 
     assign(assigns,
@@ -426,6 +427,11 @@ defmodule Erabi.Components do
       do: base,
       else: struct!(base, shortcuts) |> Map.from_struct() |> Map.to_list() |> Rules.new()
   end
+
+  # Where the popup is a sheet: "auto" is the browser's default, unsaid.
+  defp sheet(nil), do: sheet(Application.get_env(:erabi, :sheet, :auto))
+  defp sheet(:auto), do: nil
+  defp sheet(mode) when mode in [:always, :never], do: Atom.to_string(mode)
 
   defp value_list(nil, _multiple), do: []
   defp value_list(values, true) when is_list(values), do: values

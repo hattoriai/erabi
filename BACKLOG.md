@@ -2,12 +2,6 @@
 
 Known gaps in Erabi, each to become an issue.
 
-## A bottom sheet on phones
-
-The popup is a dropdown on every screen. On a narrow screen, a sheet
-from the bottom with a large box to search in (Koyomi's popover becomes
-one), and tests on phones.
-
 ## Item-aligned lists
 
 A select's list placed over the field, with the chosen option where the

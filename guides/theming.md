@@ -48,7 +48,10 @@ or to Sumi's own palette when the page has none.
 
 ## Touch
 
-On a coarse pointer, fields and rows are taller (2.75rem).
+On a coarse pointer, fields and rows are taller (2.75rem). On a phone,
+popups are sheets from the bottom of the screen (`.erabi-sheet`, its
+head `.erabi-sheet-head`, its dimmed page `.erabi-sheet::backdrop`); see
+the Pickers guide.
 
 ## Classes
 

@@ -331,7 +331,7 @@ export class EmojiPicker implements AnyPicker {
     this.list = el("div", { id: listId, class: "erabi-emoji-list", role: "listbox", "aria-label": config.label ?? this.words.t("emoji") });
     this.preview = el("div", { class: "erabi-emoji-preview", "aria-hidden": "true" });
     const body = el("div", { id: `${this.id}-dialog`, class: "erabi-popup-body erabi-emoji-popup", role: "dialog", "aria-label": config.label ?? this.words.t("emoji") }, head, this.nav, this.list, this.preview);
-    this.popup = new internal.Popup(this.field, body, () => this.close(false), { width: 352, maxHeight: 460 });
+    this.popup = new internal.Popup(this.field, body, () => this.close(false), { width: 352, maxHeight: 460, ...internal.sheetOf(config, this.words) });
 
     this.live = el("div", { class: "erabi-live", "aria-live": "polite", "aria-atomic": "true" });
     this.el.append(this.field, body, this.live);

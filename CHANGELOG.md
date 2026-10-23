@@ -41,6 +41,11 @@ and Erabi follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   the server, as the browser does, and checks a changeset's value.
   Emoji columns in Masu: `Erabi.cell_editor(:emoji, ...)`.
 - `mix erabi.install` adds the endpoint's `Plug.Static` of the emoji.
+- On phones, every picker's popup is a sheet from the bottom of the
+  screen: a dimmed page that does not scroll and takes no taps, the
+  picker's name and Done, a swipe down to close, above the on-screen
+  keyboard, with a combobox's box to type in moved into it. The `sheet`
+  attribute (and `config :erabi, sheet:`): `:auto`, `:always`, `:never`.
 - Tags typed with Enter or a comma, and "Create “…”" under the rules.
 - `Erabi.Rules`, the same in the browser and in
   `Erabi.Changeset.validate_choice/4`: required, counts, creation,

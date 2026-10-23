@@ -125,6 +125,11 @@ export class Listbox {
     return this.rows.length > VIRTUAL;
   }
 
+  /** Measures the row height again (a sheet's rows are taller). */
+  remeasure(): void {
+    this.height = 0;
+  }
+
   private rowHeight(): number {
     if (this.height === 0) {
       // The row height of the theme, in pixels (it may be in rem).

@@ -144,7 +144,7 @@ export class ColorPicker implements AnyPicker {
     this.swatches = el("div", { class: "erabi-swatches", role: "listbox", "aria-label": this.words.t("swatches") });
     body.append(this.swatches);
     if (this.canCustom) body.append(this.buildCustom());
-    this.popup = new internal.Popup(this.field, body, () => this.close(false), { width: 272, maxHeight: 520 });
+    this.popup = new internal.Popup(this.field, body, () => this.close(false), { width: 272, maxHeight: 520, ...internal.sheetOf(config, this.words) });
 
     this.live = el("div", { class: "erabi-live", "aria-live": "polite", "aria-atomic": "true" });
     this.el.append(this.field, body, this.live);

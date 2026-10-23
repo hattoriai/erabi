@@ -70,7 +70,8 @@ defmodule Erabi.Messages.Translations do
     "recentEmoji" => "Recent",
     "loading" => "Loading…",
     "pickEmoji" => "Pick an emoji",
-    "pickIcon" => "Pick an icon"
+    "pickIcon" => "Pick an icon",
+    "done" => "Done"
   }
 
   @translations %{
@@ -140,7 +141,8 @@ defmodule Erabi.Messages.Translations do
       "recentEmoji" => "Recentes",
       "loading" => "A carregar…",
       "pickEmoji" => "Escolha um emoji",
-      "pickIcon" => "Escolha um ícone"
+      "pickIcon" => "Escolha um ícone",
+      "done" => "Concluído"
     },
     "es" => %{
       "choose" => "Elegir…",
@@ -208,7 +210,8 @@ defmodule Erabi.Messages.Translations do
       "recentEmoji" => "Recientes",
       "loading" => "Cargando…",
       "pickEmoji" => "Elige un emoji",
-      "pickIcon" => "Elige un icono"
+      "pickIcon" => "Elige un icono",
+      "done" => "Listo"
     },
     "fr" => %{
       "choose" => "Choisir…",
@@ -276,7 +279,8 @@ defmodule Erabi.Messages.Translations do
       "recentEmoji" => "Récents",
       "loading" => "Chargement…",
       "pickEmoji" => "Choisissez un emoji",
-      "pickIcon" => "Choisissez une icône"
+      "pickIcon" => "Choisissez une icône",
+      "done" => "OK"
     },
     "de" => %{
       "choose" => "Auswählen…",
@@ -344,7 +348,8 @@ defmodule Erabi.Messages.Translations do
       "recentEmoji" => "Zuletzt verwendet",
       "loading" => "Wird geladen…",
       "pickEmoji" => "Wähle ein Emoji",
-      "pickIcon" => "Wähle ein Symbol"
+      "pickIcon" => "Wähle ein Symbol",
+      "done" => "Fertig"
     },
     "it" => %{
       "choose" => "Scegli…",
@@ -412,7 +417,8 @@ defmodule Erabi.Messages.Translations do
       "recentEmoji" => "Recenti",
       "loading" => "Caricamento…",
       "pickEmoji" => "Scegli un'emoji",
-      "pickIcon" => "Scegli un'icona"
+      "pickIcon" => "Scegli un'icona",
+      "done" => "Fine"
     },
     "nl" => %{
       "choose" => "Kiezen…",
@@ -480,7 +486,8 @@ defmodule Erabi.Messages.Translations do
       "recentEmoji" => "Recent",
       "loading" => "Laden…",
       "pickEmoji" => "Kies een emoji",
-      "pickIcon" => "Kies een pictogram"
+      "pickIcon" => "Kies een pictogram",
+      "done" => "Klaar"
     },
     "ja" => %{
       "choose" => "選択…",
@@ -548,7 +555,8 @@ defmodule Erabi.Messages.Translations do
       "recentEmoji" => "最近使った絵文字",
       "loading" => "読み込み中…",
       "pickEmoji" => "絵文字を選択",
-      "pickIcon" => "アイコンを選択"
+      "pickIcon" => "アイコンを選択",
+      "done" => "完了"
     }
   }
 

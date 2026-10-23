@@ -92,6 +92,8 @@ export interface Config {
   emojiData?: string;
   /** An emoji picker without skin tones. */
   noTones?: boolean;
+  /** Where the popup is a sheet from the bottom of the screen: on a phone ("auto", the default), always, or never. */
+  sheet?: "auto" | "always" | "never";
 }
 
 /** Who holds a picker's lock, with Issho: someone else, or this person (`mine`). */
@@ -125,6 +127,12 @@ export function readValue(el: HTMLElement): string[] {
   } catch {
     return [];
   }
+}
+
+/** What a picker's popup is, as a sheet: where, its title (the picker's name), and the word of its Done. */
+export function sheetOf(config: Config, words: Words): { sheet: "auto" | "always" | "never"; title: string; done: string } {
+  const label = config.labelId ? document.getElementById(config.labelId)?.textContent?.trim() : null;
+  return { sheet: config.sheet ?? "auto", title: label || config.label || "", done: words.t("done") };
 }
 
 /** The words of a picker, with placeholders and plural forms. */

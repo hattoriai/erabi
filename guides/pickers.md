@@ -172,7 +172,24 @@ search by their labels and keywords. It posts the option's value.
 | `disabled`, `readonly` | as on any field |
 | `locale`, `messages` | the words (see `Erabi.Messages`) |
 | `on_change` | an event the picker pushes on each change, outside a form |
+| `sheet` | where the popup is a sheet from the bottom of the screen: on phones (`:auto`), `:always`, `:never`; `config :erabi, sheet:` for every picker |
 | `:icon` slot | draws an option's `:icon` by its name |
+
+## On phones
+
+On a phone (a touch screen narrower than 640px, or shorter than 480px,
+as a phone on its side), every picker's popup is a sheet from the bottom
+of the screen, as the phone's own pickers are: over a dimmed page that
+does not scroll, with the picker's name and a Done button, rows of
+2.75rem, and as tall as the screen allows above the on-screen keyboard.
+A combobox's or tags' box to type in moves into the sheet while it is
+open, so that it stays above the keyboard. A tap on the dimmed page
+(which then does nothing on the page), Done, or a swipe down from the
+sheet's top closes it. Text boxes in a sheet are 16px at least, so that
+the phone does not zoom in on them.
+
+`sheet={:never}` keeps a picker a dropdown everywhere; `sheet={:always}`
+makes it a sheet on every screen.
 
 ## Outside a form
 

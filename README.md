@@ -33,6 +33,8 @@ date. It gives your app:
   for the options it has, ranked by the same matcher as Jumon's palette,
   with the matched letters marked;
 * lists of thousands of options, drawn a screenful at a time;
+* on phones, every popup a sheet from the bottom of the screen, above the
+  keyboard, with Done and a swipe down to close;
 * the keyboard and screen readers of the WAI-ARIA combobox and listbox
   patterns: arrows, Home and End, typeahead, Backspace on chips, Escape,
   announcements of what was added and removed;

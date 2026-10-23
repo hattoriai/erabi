@@ -92,6 +92,12 @@ defmodule Erabi.Components.Shared do
         default: nil,
         doc: "the person choosing, with `issho`, as `Issho.Actor` says them"
 
+      attr :sheet, :atom,
+        default: nil,
+        values: [nil, :auto, :always, :never],
+        doc:
+          "where the popup is a sheet from the bottom of the screen: on phones (`:auto`), `:always` or `:never`; the default is `config :erabi, sheet:`, else `:auto`"
+
       attr :class, :any, default: nil, doc: "classes for the picker element"
 
       attr :rest, :global,

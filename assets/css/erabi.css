@@ -1254,3 +1254,166 @@
     outline: 2px solid Highlight;
   }
 }
+
+/* On a phone, the popup is a sheet from the bottom of the screen. */
+
+.erabi-popup.erabi-sheet {
+  inline-size: 100%;
+  max-inline-size: none;
+  box-sizing: border-box;
+  padding-bottom: env(safe-area-inset-bottom);
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -8px 32px -8px rgba(0, 0, 0, 0.28);
+  --erabi-row-height: 2.75rem;
+  transition: translate 200ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.erabi-popup.erabi-sheet.erabi-dragging {
+  transition: none;
+}
+
+.erabi-sheet::backdrop,
+.erabi-sheet-backdrop {
+  background: rgba(0, 0, 0, 0.36);
+}
+
+.erabi-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .erabi-popup.erabi-sheet:popover-open {
+    animation: erabi-sheet-in 260ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .erabi-sheet:popover-open::backdrop {
+    animation: erabi-fade-in 260ms ease-out;
+  }
+}
+
+@keyframes erabi-sheet-in {
+  from {
+    translate: 0 100%;
+  }
+}
+
+@keyframes erabi-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.erabi-sheet-head {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.375rem 1rem 0.25rem;
+  touch-action: none;
+  cursor: grab;
+}
+
+.erabi-sheet-handle {
+  inline-size: 2.25rem;
+  block-size: 5px;
+  border-radius: 3px;
+  background: var(--erabi-border-hover);
+}
+
+.erabi-sheet-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  inline-size: 100%;
+  min-block-size: 2.75rem;
+}
+
+.erabi-sheet-title {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.erabi-sheet-done {
+  flex: none;
+  min-block-size: 2.75rem;
+  padding: 0 0.25rem;
+  border: 0;
+  background: transparent;
+  color: var(--erabi-accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.erabi-sheet-slot {
+  inline-size: 100%;
+}
+
+.erabi-sheet-slot:empty {
+  display: none;
+}
+
+.erabi-sheet-slot .erabi-input {
+  inline-size: 100%;
+  min-block-size: 2.75rem;
+  box-sizing: border-box;
+  padding: 0 0.75rem;
+  border: 1px solid var(--erabi-border);
+  border-radius: var(--erabi-inner-radius);
+  background: var(--erabi-background);
+  font-size: 1rem;
+}
+
+.erabi-sheet-slot .erabi-input:focus {
+  outline: none;
+  border-color: var(--erabi-accent);
+  box-shadow: 0 0 0 1px var(--erabi-accent);
+}
+
+/* Text boxes of 16px at least, so that a phone does not zoom in on them. */
+.erabi-sheet .erabi-filter,
+.erabi-sheet .erabi-hex {
+  font-size: 1rem;
+}
+
+.erabi-sheet .erabi-filter-box {
+  min-block-size: 2.75rem;
+}
+
+.erabi-sheet.erabi-color-popup .erabi-swatch .erabi-sample {
+  inline-size: 2rem;
+  block-size: 2rem;
+}
+
+.erabi-sheet .erabi-area {
+  aspect-ratio: auto;
+  block-size: 9rem;
+}
+
+.erabi-sheet.erabi-emoji-popup {
+  block-size: 80dvh;
+}
+
+.erabi-sheet .erabi-emoji-grid {
+  grid-template-columns: repeat(auto-fill, minmax(2.75rem, 1fr));
+}
+
+.erabi-sheet .erabi-emoji-cell {
+  block-size: 2.75rem;
+  font-size: 1.625rem;
+}
+
+.erabi-sheet .erabi-emoji-category {
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+}
+
+.erabi-sheet.erabi-color-popup .erabi-sheet-head {
+  margin: -0.5rem -0.75rem -0.25rem;
+  padding-inline: 0.75rem;
+}
