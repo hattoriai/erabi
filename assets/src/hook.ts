@@ -17,7 +17,7 @@ interface ErabiHook extends HookContext {
   picker?: Picker;
 }
 
-const SERVER_EVENTS = ["erabi:set", "erabi:results", "erabi:refresh", "erabi:open", "erabi:close", "erabi:focus"];
+const SERVER_EVENTS = ["erabi:set", "erabi:results", "erabi:refresh", "erabi:open", "erabi:close", "erabi:focus", "erabi:people"];
 
 function onServerEvent(picker: Picker, event: string, payload: Record<string, unknown>): void {
   if (payload.id !== picker.id) return;
@@ -40,6 +40,9 @@ function onServerEvent(picker: Picker, event: string, payload: Record<string, un
     case "erabi:focus":
       picker.focus();
       break;
+    case "erabi:people":
+      picker.setPeers((payload.people ?? []) as Parameters<Picker["setPeers"]>[0]);
+      break;
   }
 }
 
@@ -53,6 +56,9 @@ export const Erabi = {
         // A search runs in the LiveView (Erabi.Live), wherever the picker is.
         if (target && event !== "erabi:search") hook.pushEventTo(target, event, payload, reply);
         else hook.pushEvent(event, payload, reply);
+      },
+      pushTo(selector, event, payload) {
+        hook.pushEventTo(selector, event, payload);
       },
     };
     hook.picker = new Picker(hook.el, transport);

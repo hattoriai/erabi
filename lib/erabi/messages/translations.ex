@@ -38,7 +38,8 @@ defmodule Erabi.Messages.Translations do
     "tooLongOne" => "At most {n} character",
     "tooLongOther" => "At most {n} characters",
     "format" => "Not in the right form",
-    "duplicate" => "Already chosen"
+    "duplicate" => "Already chosen",
+    "choosing" => "{name} is choosing"
   }
 
   @translations %{
@@ -76,7 +77,8 @@ defmodule Erabi.Messages.Translations do
       "tooLongOne" => "No máximo {n} carácter",
       "tooLongOther" => "No máximo {n} caracteres",
       "format" => "Não está na forma certa",
-      "duplicate" => "Já escolhido"
+      "duplicate" => "Já escolhido",
+      "choosing" => "{name} está a escolher"
     },
     "es" => %{
       "choose" => "Elegir…",
@@ -112,7 +114,8 @@ defmodule Erabi.Messages.Translations do
       "tooLongOne" => "Como máximo {n} carácter",
       "tooLongOther" => "Como máximo {n} caracteres",
       "format" => "No tiene la forma correcta",
-      "duplicate" => "Ya elegido"
+      "duplicate" => "Ya elegido",
+      "choosing" => "{name} está eligiendo"
     },
     "fr" => %{
       "choose" => "Choisir…",
@@ -148,7 +151,8 @@ defmodule Erabi.Messages.Translations do
       "tooLongOne" => "Au plus {n} caractère",
       "tooLongOther" => "Au plus {n} caractères",
       "format" => "Pas dans la bonne forme",
-      "duplicate" => "Déjà choisi"
+      "duplicate" => "Déjà choisi",
+      "choosing" => "{name} est en train de choisir"
     },
     "de" => %{
       "choose" => "Auswählen…",
@@ -184,7 +188,8 @@ defmodule Erabi.Messages.Translations do
       "tooLongOne" => "Höchstens {n} Zeichen",
       "tooLongOther" => "Höchstens {n} Zeichen",
       "format" => "Nicht in der richtigen Form",
-      "duplicate" => "Schon ausgewählt"
+      "duplicate" => "Schon ausgewählt",
+      "choosing" => "{name} wählt gerade"
     },
     "it" => %{
       "choose" => "Scegli…",
@@ -220,7 +225,8 @@ defmodule Erabi.Messages.Translations do
       "tooLongOne" => "Al massimo {n} carattere",
       "tooLongOther" => "Al massimo {n} caratteri",
       "format" => "Non nella forma giusta",
-      "duplicate" => "Già scelto"
+      "duplicate" => "Già scelto",
+      "choosing" => "{name} sta scegliendo"
     },
     "nl" => %{
       "choose" => "Kiezen…",
@@ -256,7 +262,8 @@ defmodule Erabi.Messages.Translations do
       "tooLongOne" => "Hoogstens {n} teken",
       "tooLongOther" => "Hoogstens {n} tekens",
       "format" => "Niet in de juiste vorm",
-      "duplicate" => "Al gekozen"
+      "duplicate" => "Al gekozen",
+      "choosing" => "{name} is aan het kiezen"
     },
     "ja" => %{
       "choose" => "選択…",
@@ -292,7 +299,8 @@ defmodule Erabi.Messages.Translations do
       "tooLongOne" => "{n}文字以内",
       "tooLongOther" => "{n}文字以内",
       "format" => "形式が正しくありません",
-      "duplicate" => "選択済みです"
+      "duplicate" => "選択済みです",
+      "choosing" => "{name}が選択中"
     }
   }
 

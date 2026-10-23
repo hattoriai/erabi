@@ -83,6 +83,15 @@ defmodule Erabi.Components.Shared do
         doc:
           "an event that the picker pushes with `%{\"id\", \"value\"}` on each change, for a picker outside a form"
 
+      attr :issho, :any,
+        default: nil,
+        doc:
+          "with Issho, the picker's document in a room, to show who is choosing in it: `[instance: MyApp.Issho, document: \"page:42/status\"]` (see `Erabi.Issho`)"
+
+      attr :user, :any,
+        default: nil,
+        doc: "the person choosing, with `issho`, as `Issho.Actor` says them"
+
       attr :class, :any, default: nil, doc: "classes for the picker element"
 
       attr :rest, :global,

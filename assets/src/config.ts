@@ -84,6 +84,19 @@ export interface Config {
   onChange?: string;
   /** The icons the app drew, by name, in <template data-erabi-icon>. */
   icons?: boolean;
+  /** With Issho (Erabi.Issho): the element of the picker's room, which the picker tells where its person is. */
+  issho?: { target: string };
+}
+
+/** Someone else in the picker, with Issho: a person or an agent, and where they are. */
+export interface Peer {
+  key: string;
+  name: string;
+  avatar?: string | null;
+  color: string;
+  kind: "human" | "agent";
+  /** Their place in the picker: `{open, option}`, or `{}` on its field. */
+  at: { open?: boolean; option?: string; x?: number; y?: number };
 }
 
 export function readConfig(el: HTMLElement): Config {

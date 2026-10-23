@@ -5,7 +5,7 @@
 // <select>, or an <input>), so the form sees what it would without
 // JavaScript, with `input` and `change` events for phx-change.
 
-import { option, readConfig, readValue, Words, type Config, type Kind, type Option } from "./config";
+import { option, readConfig, readValue, Words, type Config, type Kind, type Option, type Peer } from "./config";
 import { el, icon, initials } from "./dom";
 import { Listbox, choosable, type Row } from "./listbox";
 import { fold, rank, score } from "./match";
@@ -15,6 +15,8 @@ import { Search, type Results } from "./search";
 
 export interface Transport {
   push(event: string, payload: Record<string, unknown>, onReply?: (reply: Record<string, unknown>) => void): void;
+  /** Pushes to an element of the page (a LiveComponent's). */
+  pushTo?(target: string, event: string, payload: Record<string, unknown>): void;
 }
 
 const TYPEAHEAD = 600;
@@ -49,6 +51,13 @@ export class Picker {
   private typedAt = 0;
   private message: string | null = null;
   private cleanups: (() => void)[] = [];
+  /** With Issho: the others in the picker, and the peek of the list where one of them is. */
+  private peers: Peer[] = [];
+  private peersEl!: HTMLElement;
+  private peek: Popup | null = null;
+  private peekList: Listbox | null = null;
+  private placeTimer: ReturnType<typeof setTimeout> | null = null;
+  private lastPlace = "null";
 
   constructor(el: HTMLElement, transport: Transport | null) {
     this.el = el;
@@ -173,13 +182,18 @@ export class Picker {
       });
       this.field.append(this.clearButton);
     }
+    this.peersEl = el("span", { class: "erabi-peers", "aria-hidden": "true" });
+    this.field.append(this.peersEl);
     this.field.append(el("span", { class: "erabi-chevron", "aria-hidden": "true" }, icon("chevron")));
 
     this.list = new Listbox(listId, this.multiple, config.labelId ?? null, config.label ?? null, (option, positions) => this.draw(option, positions, "row"));
     this.list.onPick = (row) => this.pick(row);
     this.list.onRetry = () => this.search?.run(this.query);
     this.list.onNearEnd = () => this.search?.more(this.query);
-    this.list.el.addEventListener("erabi:active", () => this.syncActive());
+    this.list.el.addEventListener("erabi:active", () => {
+      this.syncActive();
+      this.tellPlace();
+    });
 
     const popup = el("div", { class: "erabi-popup-body", role: this.filtering ? "dialog" : null, "aria-label": this.filtering ? (config.label ?? null) : null });
     if (this.filtering) {
@@ -203,6 +217,7 @@ export class Picker {
     this.live = el("div", { class: "erabi-live", "aria-live": "polite", "aria-atomic": "true" });
     this.el.append(this.field, popup, this.live);
     this.listen();
+    this.share();
   }
 
   private listen(): void {
@@ -389,6 +404,8 @@ export class Picker {
     if (this.search && !this.results) this.search.run(this.query);
     this.refresh(true);
     this.popup.place();
+    this.hidePeek();
+    this.tellPlace();
   }
 
   /** Closes the list; `restore` gives the focus back to the field. */
@@ -401,6 +418,8 @@ export class Picker {
     this.el.classList.remove("erabi-open");
     if (this.filtering) this.setQuery("", false);
     if (restore) this.control.focus();
+    this.tellPlace();
+    this.showPeek();
   }
 
   /** The focus left the picker: the list closes, and a typed value is kept or taken back. */
@@ -726,6 +745,7 @@ export class Picker {
     }
     const nodes: Node[] = [...(o.color && !o.avatar && !o.person ? [] : this.visual(o)), main];
     if (o.person === "agent") nodes.push(el("span", { class: "erabi-badge" }, this.words.t("agent")));
+    if (where === "row") for (const peer of this.peers.filter((p) => p.at.open && p.at.option === o.value)) nodes.push(this.peerMark(peer));
     if (this.config.me && o.value === this.config.me && where === "row") nodes.push(el("span", { class: "erabi-me" }, this.words.t("me")));
     if (o.hint && where === "row") nodes.push(el("span", { class: "erabi-hint" }, o.hint));
     if (typeof o.disabled === "string" && where === "row") nodes.push(el("span", { class: "erabi-hint" }, o.disabled));
@@ -781,6 +801,117 @@ export class Picker {
     requestAnimationFrame(() => (this.live.textContent = text));
   }
 
+  // -- Others choosing (Erabi.Issho) --------------------------------------
+
+  /**
+   * Issho's pointers, through the symbols it reads (no import of it): a
+   * place of the picker (`{open, option}`, or `{}` for the field) is
+   * where its option or its field is on this screen, and a person's
+   * pointer over an option of their list is that option.
+   */
+  private share(): void {
+    const element = this.el as unknown as Record<symbol, unknown>;
+    const locator = (at: unknown) => this.locate(at);
+    const pointer = (x: number, y: number) => this.placeAt(x, y);
+    element[Symbol.for("issho.locator")] = locator;
+    element[Symbol.for("issho.point")] = pointer;
+    this.cleanups.push(() => {
+      if (element[Symbol.for("issho.locator")] === locator) delete element[Symbol.for("issho.locator")];
+      if (element[Symbol.for("issho.point")] === pointer) delete element[Symbol.for("issho.point")];
+    });
+  }
+
+  private locate(at: unknown): DOMRect | null {
+    const place = (typeof at === "object" && at !== null ? at : {}) as Peer["at"];
+    if (place.option !== undefined) {
+      const lists = [this.popup.open ? this.list : null, this.peek?.open ? this.peekList : null];
+      for (const list of lists) {
+        const row = list?.el.querySelector<HTMLElement>(`[data-value="${CSS.escape(place.option)}"]`);
+        if (row) return row.getBoundingClientRect();
+      }
+    }
+    return this.field.getBoundingClientRect();
+  }
+
+  private placeAt(x: number, y: number): Peer["at"] | null {
+    const target = document.elementFromPoint(x, y);
+    if (!target || !this.el.contains(target)) return null;
+    const row = target.closest<HTMLElement>("[data-value]");
+    if (row && this.list.el.contains(row)) {
+      const box = row.getBoundingClientRect();
+      const fraction = (v: number, from: number, size: number) => Math.round(Math.min(1, Math.max(0, (v - from) / size)) * 100) / 100;
+      return { open: true, option: row.dataset.value!, x: fraction(x, box.left, box.width), y: fraction(y, box.top, box.height) };
+    }
+    return this.field.contains(target) ? {} : null;
+  }
+
+  /** Tells the picker's room where its person is: the option of their open list, or nowhere. */
+  private tellPlace(): void {
+    const target = this.config.issho?.target;
+    if (!target || !this.transport?.pushTo) return;
+    const row = this.list.rows[this.list.active];
+    const at = this.popup.open ? { open: true, ...(row?.type === "option" ? { option: row.option.value } : {}) } : null;
+    const json = JSON.stringify(at);
+    if (json === this.lastPlace) return;
+    this.lastPlace = json;
+    if (this.placeTimer) clearTimeout(this.placeTimer);
+    this.placeTimer = setTimeout(() => this.transport?.pushTo?.(target, "erabi:place", { at }), 80);
+  }
+
+  /** The others in the picker (Erabi.Issho's "erabi:people"). */
+  setPeers(peers: Peer[]): void {
+    const before = new Set(this.peers.filter((p) => p.at.open).map((p) => p.key));
+    this.peers = peers;
+    const choosing = peers.filter((p) => p.at.open);
+    this.peersEl.replaceChildren(...peers.slice(0, 3).map((p) => this.peerMark(p)));
+    this.field.classList.toggle("erabi-peer-open", choosing.length > 0);
+    if (choosing[0]) this.field.style.setProperty("--erabi-peer", choosing[0].color);
+    else this.field.style.removeProperty("--erabi-peer");
+    this.field.title = choosing.map((p) => this.words.t("choosing", { name: p.name })).join(", ");
+    for (const p of choosing) if (!before.has(p.key)) this.say(this.words.t("choosing", { name: p.name }));
+    if (this.popup.open) this.refresh(false);
+    else this.showPeek();
+  }
+
+  private peerMark(peer: Peer): HTMLElement {
+    const mark = el("span", { class: "erabi-avatar erabi-peer", "data-kind": peer.kind, title: peer.name });
+    mark.style.setProperty("--erabi-avatar-color", peer.color);
+    if (peer.avatar) mark.append(el("img", { src: peer.avatar, alt: "" }));
+    else mark.append(initials(peer.name));
+    return mark;
+  }
+
+  /**
+   * The list as someone else has it open, on a screen where it is closed:
+   * read-only, their option marked in their color, so that the people see
+   * an agent (or a person) go through the options.
+   */
+  private showPeek(): void {
+    const peer = this.peers.find((p) => p.at.open);
+    if (!peer || this.popup.open) return this.hidePeek();
+    if (!this.peek) {
+      this.peekList = new Listbox(`${this.id}-peek`, this.multiple, null, null, (o, positions) => this.draw(o, positions, "row"));
+      const body = el("div", { class: "erabi-popup-body erabi-peek", "aria-hidden": "true" }, this.peekList.el);
+      this.peekList.el.removeAttribute("role");
+      this.peekList.el.removeAttribute("tabindex");
+      this.el.append(body);
+      this.peek = new Popup(this.field, body, () => {});
+    }
+    const saved = this.query;
+    this.query = "";
+    const rows = this.rows();
+    this.query = saved;
+    const active = rows.findIndex((row) => row.type === "option" && row.option.value === peer.at.option);
+    this.peek.el.style.setProperty("--erabi-peer", peer.color);
+    this.peek.show();
+    this.peekList!.setRows(rows, active);
+    this.peek.place();
+  }
+
+  private hidePeek(): void {
+    this.peek?.hide();
+  }
+
   // -- For others (Erabi.Live, a grid's editor) ---------------------------
 
   focus(): void {
@@ -820,6 +951,8 @@ export class Picker {
   destroy(): void {
     for (const cleanup of this.cleanups) cleanup();
     this.cleanups = [];
+    if (this.placeTimer) clearTimeout(this.placeTimer);
+    this.peek?.destroy();
     this.popup.destroy();
     this.search?.destroy();
   }

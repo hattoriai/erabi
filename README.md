@@ -30,6 +30,10 @@ date. It gives your app:
   announcements of what was added and removed;
 * editors of a grid's cells, for [Masu](https://hex.pm/packages/masu)
   (`Erabi.cell_editor/2`);
+* with [Issho](https://hex.pm/packages/issho), who else is choosing: the
+  people and agents who have a picker open, the option each is on, and an
+  agent that goes through the options before its change lands
+  (`Erabi.Issho`);
 * `Erabi.Test`, to choose and search in `Phoenix.LiveViewTest` with no
   browser.
 
@@ -50,6 +54,7 @@ hook and one style sheet.
 | Looks | chips in nine colors, avatars, icons drawn by your `:icon` slot, groups with headings, hints; light and dark; the Sumi theme |
 | Accessibility | the WAI-ARIA combobox (select-only and editable) and listbox patterns, `aria-activedescendant`, typeahead, announcements, forced colors, reduced motion |
 | Words | English, Portuguese, Spanish, French, German, Italian, Dutch and Japanese; yours with `messages` or Gettext |
+| Choosing together | with Issho: the others who have a picker open on its field, their options marked, a peek of the list where they are; `Erabi.Issho.choose/5` for an agent to choose as people watch |
 | Grids | `Erabi.cell_editor/2` and `erabiEditors()`: a picker as the editor of a Masu column |
 | Testing | `Erabi.Test.choose/3`, `choices/2`, `chosen/2`, `search/3` |
 
@@ -172,6 +177,7 @@ on_mount Erabi.Live
 * [Rules](guides/rules.md) - the same rules in the browser and on the server.
 * [Search](guides/search.md) - options from the server as people type.
 * [Grids](guides/grids.md) - pickers as the editors of Masu's cells.
+* [Choosing together](guides/choosing.md) - who else is choosing, with Issho; agents that choose as people watch.
 * [Testing](guides/testing.md) - `Erabi.Test` in `Phoenix.LiveViewTest`.
 * [Theming](guides/theming.md) - the custom properties, dark mode, the palette, Sumi.
 * [Accessibility](guides/accessibility.md) - the keyboard and screen readers.

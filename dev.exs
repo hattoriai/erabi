@@ -240,7 +240,7 @@ defmodule ErabiDev.Layouts do
       <body class={@sumi && "sumi"}>
         <main>
           <nav>
-            <a href="/">Pickers</a><a href="/plain">Without LiveView</a><a href="/?theme=sumi">Sumi</a><a href="/?dark=1">Dark</a><a href="/?locale=pt-PT">pt-PT</a>
+            <a href="/">Pickers</a><a href="/choosing">Choosing together</a><a href="/plain">Without LiveView</a><a href="/?theme=sumi">Sumi</a><a href="/?dark=1">Dark</a><a href="/?locale=pt-PT">pt-PT</a>
           </nav>
           {@inner_content}
         </main>
@@ -381,6 +381,97 @@ defmodule ErabiDev.PickersLive do
     do: {:noreply, assign(socket, picked: value)}
 end
 
+defmodule ErabiDev.Policy do
+  @moduledoc "The Issho policy of the development pages: everyone may do everything."
+  @behaviour Issho.Policy
+  @impl true
+  def authorize(_identity, _room, _action), do: :ok
+end
+
+defmodule ErabiDev.ChoosingLive do
+  @moduledoc """
+  A picker in an Issho room (Erabi.Issho): open the page as two people
+  (`?user=ada`, `?user=ken`), and see who is choosing; a button lets an
+  agent choose, as people watch.
+  """
+  use Phoenix.LiveView
+
+  import Erabi.Components
+
+  alias Issho.Tool.Context
+
+  on_mount(Issho.Live)
+
+  @room "page:demo"
+  @statuses ErabiDev.Data.statuses()
+
+  def mount(params, _session, socket) do
+    name = params["user"] || "ada"
+    if connected?(socket), do: Phoenix.PubSub.subscribe(ErabiDev.PubSub, @room)
+
+    {:ok,
+     assign(socket,
+       user: %{id: name, name: String.capitalize(name)},
+       statuses: @statuses,
+       status: :persistent_term.get({__MODULE__, :status}, :todo)
+     )}
+  end
+
+  def render(assigns) do
+    ~H"""
+    <h1>Choosing together</h1>
+    <p class="lede">Open this page as another person (<a href="/choosing?user=ken">Ken</a>), or let an agent choose.</p>
+    <div style="max-width: 20rem">
+      <label class="label" for="status">Status</label>
+      <.select
+        name="status"
+        value={@status}
+        options={@statuses}
+        on_change="status"
+        issho={[instance: ErabiDev.Issho, document: "page:demo/status"]}
+        user={@user}
+      />
+    </div>
+    <p><button type="button" phx-click="agent">Let Claude choose</button></p>
+    <p>Status: <span id="status-value">{@status}</span></p>
+    """
+  end
+
+  def handle_event("status", %{"value" => value}, socket) do
+    save(String.to_existing_atom(value))
+    {:noreply, socket}
+  end
+
+  # The agent: it joins the room, goes through the picker, and the change
+  # lands as the app saves it.
+  def handle_event("agent", _params, socket) do
+    statuses = Enum.map(@statuses, & &1.value)
+    current = :persistent_term.get({__MODULE__, :status}, :todo)
+
+    next =
+      Enum.at(statuses, rem(Enum.find_index(statuses, &(&1 == current)) + 2, length(statuses)))
+
+    Task.start(fn ->
+      ctx =
+        Context.new(ErabiDev.Issho, %{id: "agent:claude", name: "Claude", kind: :agent})
+
+      {:ok, participant} = Context.join(ctx, @room)
+      Erabi.Issho.choose(participant, "page:demo/status", next, fn -> save(next) end, pace: 700)
+    end)
+
+    {:noreply, socket}
+  end
+
+  def handle_info({:status, status}, socket), do: {:noreply, assign(socket, status: status)}
+
+  defp save(status) do
+    :persistent_term.put({__MODULE__, :status}, status)
+    Phoenix.PubSub.broadcast(ErabiDev.PubSub, @room, {:status, status})
+  end
+
+  def statuses, do: @statuses
+end
+
 defmodule ErabiDev.PlainHTML do
   use Phoenix.Component
   import Erabi.Components
@@ -426,6 +517,7 @@ defmodule ErabiDev.Router do
     pipe_through(:browser)
 
     live("/", ErabiDev.PickersLive)
+    live("/choosing", ErabiDev.ChoosingLive)
     get("/plain", ErabiDev.PlainController, :index)
   end
 end
@@ -463,7 +555,15 @@ Task.async(fn ->
 
   {:ok, _pid} =
     Supervisor.start_link(
-      [{Phoenix.PubSub, name: ErabiDev.PubSub}, ErabiDev.Endpoint],
+      [
+        {Phoenix.PubSub, name: ErabiDev.PubSub},
+        {Issho,
+         name: ErabiDev.Issho,
+         pubsub: ErabiDev.PubSub,
+         policy: ErabiDev.Policy,
+         secret_key_base: String.duplicate("erabi-development-secret-", 3)},
+        ErabiDev.Endpoint
+      ],
       strategy: :one_for_one
     )
 

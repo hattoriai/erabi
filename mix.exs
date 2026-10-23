@@ -54,6 +54,8 @@ defmodule Erabi.MixProject do
       {:ecto, "~> 3.13"},
       {:esbuild, "~> 0.10", only: :dev, runtime: false},
       {:ex_doc, "~> 0.34", only: :dev, runtime: false},
+      # People and agents seen choosing, with Issho (Erabi.Issho): optional.
+      {:issho, "~> 0.3", optional: true},
       {:lazy_html, "~> 0.1", only: :test},
       {:phoenix, if(@oldest, do: "~> 1.7.14", else: "~> 1.7.14 or ~> 1.8")},
       {:phoenix_ecto, "~> 4.6", only: [:dev, :test]},
@@ -109,6 +111,7 @@ defmodule Erabi.MixProject do
         "guides/rules.md",
         "guides/search.md",
         "guides/grids.md",
+        "guides/choosing.md",
         "guides/testing.md",
         "guides/theming.md",
         "guides/accessibility.md",
@@ -117,12 +120,13 @@ defmodule Erabi.MixProject do
       ],
       groups_for_extras: [
         Guides:
-          ~r{guides/(quickstart|pickers|options|forms|rules|search|grids|testing|theming)\.md},
+          ~r{guides/(quickstart|pickers|options|forms|rules|search|grids|choosing|testing|theming)\.md},
         Reference: ["guides/accessibility.md", "guides/limits.md"]
       ],
       groups_for_modules: [
         Pickers: [Erabi, Erabi.Components, Erabi.Option, Erabi.Live, Erabi.Messages],
         Rules: [Erabi.Rules, Erabi.Changeset, Erabi.Match],
+        "With Issho": [Erabi.Issho],
         Testing: [Erabi.Test]
       ]
     ]

@@ -634,3 +634,61 @@
     background: Highlight;
   }
 }
+
+/* Others choosing (Erabi.Issho): their avatars on the field, the field
+   ringed in the color of the one who has it open, their option marked in
+   the list, and a peek of the list where they are, on a screen where it
+   is closed. */
+
+.erabi-peers {
+  display: inline-flex;
+  margin-inline-start: auto;
+  padding-inline-start: 0.25rem;
+}
+
+.erabi-peers:empty {
+  display: none;
+}
+
+.erabi-avatar.erabi-peer {
+  width: 1.125rem;
+  height: 1.125rem;
+  font-size: 0.5rem;
+  box-shadow: 0 0 0 1.5px var(--erabi-background), 0 0 0 3px var(--erabi-avatar-color);
+}
+
+.erabi-peers .erabi-peer + .erabi-peer {
+  margin-inline-start: -0.25rem;
+}
+
+.erabi-option .erabi-peer {
+  margin-inline-start: auto;
+}
+
+.erabi-option .erabi-hint + .erabi-peer {
+  margin-inline-start: 0.5rem;
+}
+
+.erabi-field.erabi-peer-open {
+  border-color: var(--erabi-peer);
+  box-shadow: 0 0 0 1px var(--erabi-peer);
+}
+
+.erabi-peek {
+  pointer-events: none;
+}
+
+.erabi-peek .erabi-list {
+  max-height: 15rem;
+}
+
+.erabi-peek .erabi-option.erabi-active {
+  background: color-mix(in oklab, var(--erabi-peer, var(--erabi-accent)) 16%, var(--erabi-background));
+  box-shadow: inset 0 0 0 1.5px var(--erabi-peer, var(--erabi-accent));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .erabi-peek .erabi-option {
+    transition: background var(--erabi-transition), box-shadow var(--erabi-transition);
+  }
+}

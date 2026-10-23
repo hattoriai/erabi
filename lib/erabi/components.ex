@@ -93,6 +93,7 @@ defmodule Erabi.Components do
       phx-update="ignore"
       data-config={@config}
       data-value={@value_json}
+      data-issho-doc={@issho_join && @issho_join.document}
       {@rest}
     >
       <input :if={@multiple} type="hidden" name={@name} value="" />
@@ -123,6 +124,14 @@ defmodule Erabi.Components do
       </select>
       <template :for={name <- @icons} data-erabi-icon={name}>{render_slot(@icon, name)}</template>
     </div>
+    <.live_component
+      :if={@issho_join}
+      module={Erabi.Issho.Presence}
+      id={"#{@id}-issho"}
+      picker={@id}
+      join={@issho_join}
+      user={@user}
+    />
     """
   end
 
@@ -138,6 +147,7 @@ defmodule Erabi.Components do
     {described_by, invalid, rest} = aria(assigns)
 
     register_search(assigns.search, id, assigns.async)
+    issho_join = issho_join(assigns.issho, assigns.user)
 
     config = %{
       "v" => 1,
@@ -161,7 +171,8 @@ defmodule Erabi.Components do
       "readonly" => assigns.readonly,
       "me" => assigns[:me] && Option.param(assigns[:me]),
       "onChange" => assigns.on_change,
-      "icons" => assigns.icon != []
+      "icons" => assigns.icon != [],
+      "issho" => issho_join && %{"target" => "##{id}-issho"}
     }
 
     assign(assigns,
@@ -179,8 +190,26 @@ defmodule Erabi.Components do
       value_json: JSON.encode!(values),
       empty: assigns.placeholder || messages["choose"],
       groups: native_groups(options ++ selected, values),
-      icons: icons(assigns.icon, options)
+      icons: icons(assigns.icon, options),
+      issho_join: issho_join
     )
+  end
+
+  # The room of a picker with `issho` (Erabi.Issho): its options checked as
+  # every component of the family checks them.
+  defp issho_join(nil, _user), do: nil
+
+  defp issho_join(issho, user) do
+    unless Code.ensure_loaded?(Erabi.Issho.Presence) do
+      raise ArgumentError,
+            "Erabi: a picker's `issho` needs Issho in your deps: {:issho, \"~> 0.3\"}"
+    end
+
+    if user == nil,
+      do:
+        raise(ArgumentError, "Erabi: a picker with `issho` needs its `user`, the person choosing")
+
+    Issho.Join.new!(issho)
   end
 
   # The options of chosen values that are not among the options.
