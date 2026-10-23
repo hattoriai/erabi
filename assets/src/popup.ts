@@ -6,15 +6,23 @@
 
 const supportsPopover = typeof HTMLElement !== "undefined" && "showPopover" in HTMLElement.prototype;
 
+/** A popup's own width, instead of its field's, and its tallest. */
+export interface PopupSize {
+  width?: number;
+  maxHeight?: number;
+}
+
 export class Popup {
   readonly el: HTMLElement;
   open = false;
   private anchor: HTMLElement;
   private onOutside: () => void;
+  private size: PopupSize;
   private cleanups: (() => void)[] = [];
 
-  constructor(anchor: HTMLElement, el: HTMLElement, onOutside: () => void) {
+  constructor(anchor: HTMLElement, el: HTMLElement, onOutside: () => void, size: PopupSize = {}) {
     this.anchor = anchor;
+    this.size = size;
     this.el = el;
     this.onOutside = onOutside;
     el.classList.add("erabi-popup");
@@ -60,17 +68,18 @@ export class Popup {
     const viewport = { width: document.documentElement.clientWidth, height: window.innerHeight };
     const gap = 4;
     const margin = 8;
-    const width = Math.min(Math.max(rect.width, 224), viewport.width - margin * 2);
+    const width = Math.min(this.size.width ?? Math.max(rect.width, 224), viewport.width - margin * 2);
+    const most = this.size.maxHeight ?? 360;
     const below = viewport.height - rect.bottom - gap - margin;
     const above = rect.top - gap - margin;
-    const wanted = Math.min(this.el.scrollHeight, 360);
+    const wanted = Math.min(this.el.scrollHeight, most);
     const down = below >= wanted || below >= above;
     const room = Math.max(120, down ? below : above);
     const style = this.el.style;
     style.position = "fixed";
     style.margin = "0";
     style.width = `${width}px`;
-    style.maxHeight = `${Math.min(room, 360)}px`;
+    style.maxHeight = `${Math.min(room, most)}px`;
     const rtl = getComputedStyle(this.anchor).direction === "rtl";
     let left = rtl ? rect.right - width : rect.left;
     left = Math.min(Math.max(left, margin), viewport.width - width - margin);

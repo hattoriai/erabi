@@ -6,7 +6,8 @@ Erabi (選び, "choosing") is pickers for Phoenix LiveView: the counterpart
 to [Koyomi](https://hex.pm/packages/koyomi) for everything that is not a
 date. It gives your app:
 
-* `select`, `multi_select`, `combobox`, `tags` and `person_picker`, each a
+* `select`, `multi_select`, `combobox`, `tags`, `person_picker` and
+  `color_picker`, each a
   field of a form that posts what the browser's own `<select>` would, and
   that is that `<select>` until its hook mounts (and with JavaScript off);
 * options as you have them: `["a", "b"]`, `[{"To do", :todo}]`, a keyword
@@ -16,6 +17,9 @@ date. It gives your app:
   colors;
 * people and agents: avatars (an image, or initials on the person's
   color), agents marked as such, and "me" first;
+* a color picker: the palette's swatches, and with `custom` any color, in
+  an OKLCH area that holds only colors a screen shows, a hex box, the
+  eyedropper, recent colors and the contrast with a background;
 * tags that people type, with "Create “…”" under your rules (a pattern,
   lengths, how many);
 * the same rules in the browser, as people choose, and on the server in
@@ -37,7 +41,7 @@ date. It gives your app:
 * `Erabi.Test`, to choose and search in `Phoenix.LiveViewTest` with no
   browser.
 
-The pickers are a prebuilt JavaScript bundle in the Hex package, 11 KB
+The pickers are a prebuilt JavaScript bundle in the Hex package, 16 KB
 gzipped for every kind. Your app does not run Node.js for it: you add the
 hook and one style sheet.
 
@@ -45,7 +49,7 @@ hook and one style sheet.
 
 | | |
 | --- | --- |
-| Pickers | `select/1` (typeahead; a box to filter from 10 options), `multi_select/1` (chips; the list stays open), `combobox/1` (type to find; `create` keeps free text), `tags/1` (type, Enter or a comma; "Create “…”"), `person_picker/1` (avatars, agents, `me`, `multiple`) |
+| Pickers | `select/1` (typeahead; a box to filter from 10 options), `multi_select/1` (chips; the list stays open), `combobox/1` (type to find; `create` keeps free text), `tags/1` (type, Enter or a comma; "Create “…”"), `person_picker/1` (avatars, agents, `me`, `multiple`), `color_picker/1` (swatches; `custom` for any color as `#rrggbb`) |
 | Options | anything a `<select>` takes; maps or `Erabi.Option` with `:label`, `:hint`, `:color`, `:icon`, `:avatar`, `:kind`, `:group`, `:keywords`, `:priority`, `:disabled` (or its reason); user structs by `:id` and `:name` |
 | Forms | posts `name` (or `name[]`, after an empty one, so that none clears it), in the order chosen; `phx-change` and `phx-submit` as they are; errors with `aria-invalid` and `aria-describedby`; a `<label for>` names the picker |
 | Rules | `required`, `min`, `max`, `create`, `min_length`, `max_length`, `pattern`: in the browser and in `Erabi.Changeset.validate_choice/4`, with Ecto's messages and `translate_error` |
@@ -135,6 +139,7 @@ Then, in a form:
 <.multi_select field={@form[:labels]} options={@labels} max={3} />
 <.tags field={@form[:tags]} options={@tags} create />
 <.person_picker field={@form[:owner_id]} people={@members} me={@current_user} />
+<.color_picker field={@form[:color]} custom />
 ```
 
 with options as the app has them:
@@ -171,7 +176,7 @@ on_mount Erabi.Live
 ## Guides
 
 * [Quickstart](guides/quickstart.md) - a first picker, step by step.
-* [Pickers](guides/pickers.md) - the five kinds, and their attributes.
+* [Pickers](guides/pickers.md) - the six kinds, and their attributes.
 * [Options](guides/options.md) - labels, colors, icons, groups, people.
 * [Forms](guides/forms.md) - what a picker posts, changesets, errors, labels.
 * [Rules](guides/rules.md) - the same rules in the browser and on the server.

@@ -21,6 +21,11 @@ and Erabi follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   app's `:icon` slot, groups, keywords, priorities, disabled options with
   their reason; user structs by `:id` and `:name`.
 - People and agents: avatars, agents marked, `me` first.
+- `color_picker/1`: the palette's swatches (Erabi's nine by name, or the
+  app's colors), and with `custom` any color as `#rrggbb`: an OKLCH area
+  of lightness and chroma that holds only colors a screen shows, a hue
+  slider, a hex box, the eyedropper, recent colors, and the contrast
+  with a background (`contrast`).
 - Tags typed with Enter or a comma, and "Create “…”" under the rules.
 - `Erabi.Rules`, the same in the browser and in
   `Erabi.Changeset.validate_choice/4`: required, counts, creation,

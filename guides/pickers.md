@@ -63,6 +63,39 @@ People are maps or structs with `:id` and `:name`, and `:avatar`,
 `:color`, `:kind` (`:human` or `:agent`) when they have them: your users,
 and Issho's actors, as they are. See [Options](options.md).
 
+## `color_picker`
+
+A color: swatches of a palette, and, with `custom`, any color. The
+palette is Erabi's nine option colors by default, posted by name
+(`"blue"`) and drawn as the chips they make, so that a label's color
+reads the same where it is chosen and where it shows; or your colors, as
+options.
+
+```heex
+<.color_picker field={@form[:color]} />
+<.color_picker field={@form[:brand]} palette={[{"Ocean", "#3f6f8f"}, {"Sand", "#d8c3a5"}]} custom contrast="#ffffff" />
+```
+
+With `custom`, the popup has an area of lightness and chroma for a hue,
+and a hue slider, in OKLCH, which follows how people see colors: each row
+of the area runs out to the most chroma a screen shows, so every point is
+a color it can show. Then a hex box, the browser's eyedropper where it
+has one (Chromium), and the person's recent colors (kept in the browser).
+A custom color posts as `#rrggbb`; `custom` is the rules' `create`, with
+a `pattern` of six hex digits, which the changeset takes too:
+
+```elixir
+|> Erabi.Changeset.validate_choice(:color, [], options: Erabi.Option.colors())
+|> Erabi.Changeset.validate_choice(:brand, create: true, pattern: "#[0-9a-fA-F]{6}")
+```
+
+`contrast` is the background the color is for: the custom colors show
+their contrast ratio with it, and their WCAG grade.
+
+The swatches are a listbox: arrows move between them in rows, Home and
+End, Enter or Space takes one. The area and the hue are sliders: arrows
+move by 1 (Shift, by 5 or 10), Enter takes the color and closes.
+
 ## Attributes of every picker
 
 | | |

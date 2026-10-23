@@ -201,9 +201,9 @@ defmodule Erabi.ComponentsTest do
     assigns = %{}
 
     html =
-      rendered_to_string(
-        ~H"<.select name=\"s\" value={nil} options={[\"a\"]} locale=\"pt-PT\" label=\"S\" />"
-      )
+      rendered_to_string(~H"""
+      <.select name="s" value={nil} options={["a"]} locale="pt-PT" label="S" />
+      """)
 
     assert %{"locale" => "pt-PT", "messages" => %{"choose" => "Escolher…"}} = config(html)
     assert html =~ "Escolher…"
@@ -213,11 +213,68 @@ defmodule Erabi.ComponentsTest do
     assigns = %{}
 
     assert_raise ArgumentError, ~r/needs a `field` or a `name`/, fn ->
-      rendered_to_string(~H"<.select options={[\"a\"]} />")
+      rendered_to_string(~H"""
+      <.select options={["a"]} />
+      """)
     end
 
     assert_raise ArgumentError, ~r/`search` is a function/, fn ->
-      rendered_to_string(~H"<.select name=\"s\" search=\"cities\" />")
+      rendered_to_string(~H"""
+      <.select name="s" search="cities" />
+      """)
+    end
+  end
+
+  describe "color_picker" do
+    test "Erabi's nine colors by name, in the page's words, drawn as their chips" do
+      assigns = %{form: task_form(%{"color" => "blue"})}
+
+      html =
+        rendered_to_string(~H"""
+        <.color_picker field={@form[:color]} locale="fr" />
+        """)
+
+      config = config(html)
+      assert %{"kind" => "color"} = config
+      refute config["multiple"]
+      assert length(config["options"]) == 9
+      assert %{"v" => "blue", "l" => "Bleu", "c" => "blue"} in config["options"]
+      refute config["rules"]["create"]
+      assert value(html) == ["blue"]
+    end
+
+    test "custom takes any color as #rrggbb, which posts with the form" do
+      assigns = %{form: task_form(%{"color" => "#3f6f8f"})}
+
+      html =
+        rendered_to_string(~H"""
+        <.color_picker field={@form[:color]} custom contrast="#ffffff" />
+        """)
+
+      config = config(html)
+      assert %{"create" => true, "pattern" => "#[0-9a-fA-F]{6}"} = config["rules"]
+      assert config["contrast"] == "#ffffff"
+
+      doc = LazyHTML.from_fragment(html)
+
+      assert ["#3f6f8f"] =
+               doc |> LazyHTML.query("option[selected]") |> LazyHTML.attribute("value")
+
+      rules = Erabi.Rules.new(create: true, pattern: "#[0-9a-fA-F]{6}")
+      assert :ok = Erabi.Rules.check(rules, ["#3f6f8f"], [])
+      assert {:error, _} = Erabi.Rules.check(rules, ["teal"], [])
+    end
+
+    test "an app's palette, as options" do
+      assigns = %{}
+
+      html =
+        rendered_to_string(~H"""
+        <.color_picker name="color" value="#3f6f8f" palette={[{"Ocean", "#3f6f8f"}, {"Sand", "#d8c3a5"}]} />
+        """)
+
+      assert [%{"v" => "#3f6f8f", "l" => "Ocean"}, %{"v" => "#d8c3a5", "l" => "Sand"}] =
+               config(html)["options"]
     end
   end
 end

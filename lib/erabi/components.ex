@@ -1,7 +1,7 @@
 defmodule Erabi.Components do
   @moduledoc """
-  The pickers: `select/1`, `multi_select/1`, `combobox/1`, `tags/1` and
-  `person_picker/1`.
+  The pickers: `select/1`, `multi_select/1`, `combobox/1`, `tags/1`,
+  `person_picker/1` and `color_picker/1`.
 
       import Erabi.Components
 
@@ -10,6 +10,7 @@ defmodule Erabi.Components do
       <.combobox field={@form[:city_id]} search={&Places.cities/1} selected={@city} />
       <.tags field={@form[:tags]} options={@tags} create />
       <.person_picker field={@form[:owner_id]} people={@members} me={@current_user} />
+      <.color_picker field={@form[:color]} custom />
 
   Each picker is a field of a form: it posts what the browser's own
   `<select>` would (`name`, or `name[]` for several values), works with
@@ -27,7 +28,7 @@ defmodule Erabi.Components do
 
   alias Erabi.{Messages, Option, Rules}
 
-  @kinds [:select, :multi_select, :combobox, :tags, :person]
+  @kinds [:select, :multi_select, :combobox, :tags, :person, :color]
 
   # Lists of more options than this have a box to filter them, unless
   # `filter` says otherwise.
@@ -83,6 +84,74 @@ defmodule Erabi.Components do
     assigns = if assigns.people, do: assign(assigns, :options, assigns.people), else: assigns
     assigns |> prepare(:person, assigns.multiple) |> picker()
   end
+
+  # A custom color, as a color picker posts it.
+  @hex "#[0-9a-fA-F]{6}"
+
+  @doc """
+  A picker of a color: swatches of a palette, and, with `custom`, any
+  color, in an area of lightness and chroma for a hue and a hue slider
+  (OKLCH, which follows how people see colors, with the edge of what a
+  screen shows), a hex box, the browser's eyedropper where it has one,
+  and the person's recent colors.
+
+  The palette is Erabi's nine option colors by default (`Erabi.Option.colors/0`),
+  posted by name (`"blue"`) and drawn as the chips they make, so a label's
+  color reads the same in its picker and in its chips; or the app's
+  colors, as options (`[{"Ocean", "#3f6f8f"}]`). A custom color posts as
+  `#rrggbb`: `custom` is the rules' `create`, with a `pattern` of six hex
+  digits. Give the changeset the same rules (`Erabi.Changeset.validate_choice/4`
+  with `create: true, pattern: "#[0-9a-fA-F]{6}"`).
+
+  With `contrast` (a background, `#rrggbb`), the custom colors show their
+  contrast ratio with it, and its WCAG grade.
+  """
+  shared_attrs()
+
+  attr :palette, :list,
+    default: nil,
+    doc: "the colors to choose from, as options; the default is Erabi's nine (or `options`)"
+
+  attr :custom, :boolean, default: false, doc: "whether any color may be chosen, as `#rrggbb`"
+
+  attr :contrast, :string,
+    default: nil,
+    doc: "a background, `#rrggbb`: custom colors show their contrast ratio with it"
+
+  def color_picker(assigns) do
+    messages = Messages.for_locale(locale(assigns), assigns.messages || %{})
+
+    palette =
+      cond do
+        assigns.palette -> assigns.palette
+        assigns.options != [] -> assigns.options
+        true -> default_palette(messages)
+      end
+
+    rules =
+      if assigns.custom,
+        do: Keyword.merge(rule_list(assigns.rules), create: true, pattern: @hex),
+        else: assigns.rules
+
+    assigns
+    |> assign(options: palette, rules: rules, create: nil)
+    |> prepare(:color, false)
+    |> picker()
+  end
+
+  defp default_palette(messages) do
+    for color <- Option.colors() do
+      name = Atom.to_string(color)
+      key = "color" <> String.capitalize(name)
+      %{value: name, label: messages[key], color: color}
+    end
+  end
+
+  defp rule_list(nil), do: []
+  defp rule_list(%Rules{} = rules), do: rules |> Map.from_struct() |> Map.to_list()
+  defp rule_list(rules), do: Enum.to_list(rules)
+
+  defp locale(assigns), do: assigns.locale || Application.get_env(:erabi, :locale, "en")
 
   defp picker(assigns) do
     ~H"""
@@ -141,7 +210,7 @@ defmodule Erabi.Components do
     selected = selected(assigns.selected, options)
     values = values(assigns, multiple)
     %{id: id, input_id: input_id, name: name} = names(assigns, multiple)
-    locale = assigns.locale || Application.get_env(:erabi, :locale, "en")
+    locale = locale(assigns)
     messages = Messages.for_locale(locale, assigns.messages || %{})
     label = label(assigns)
     {described_by, invalid, rest} = aria(assigns)
@@ -172,7 +241,8 @@ defmodule Erabi.Components do
       "me" => assigns[:me] && Option.param(assigns[:me]),
       "onChange" => assigns.on_change,
       "icons" => assigns.icon != [],
-      "issho" => issho_join && %{"target" => "##{id}-issho"}
+      "issho" => issho_join && %{"target" => "##{id}-issho"},
+      "contrast" => assigns[:contrast]
     }
 
     assign(assigns,

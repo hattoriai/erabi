@@ -3,7 +3,7 @@
 
 import type { Rules } from "./rules";
 
-export type Kind = "select" | "multi_select" | "combobox" | "tags" | "person";
+export type Kind = "select" | "multi_select" | "combobox" | "tags" | "person" | "color";
 
 /** An option as the server sends it (Erabi.Option.to_wire/1). */
 export interface WireOption {
@@ -86,6 +86,8 @@ export interface Config {
   icons?: boolean;
   /** With Issho (Erabi.Issho): the element of the picker's room, which the picker tells where its person is. */
   issho?: { target: string };
+  /** A color picker's background, as #rrggbb: the custom colors show their contrast with it. */
+  contrast?: string;
 }
 
 /** Who holds a picker's lock, with Issho: someone else, or this person (`mine`). */

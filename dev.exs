@@ -162,17 +162,24 @@ defmodule ErabiDev.Task do
     field(:owner_id, :integer)
     field(:reviewer_ids, {:array, :integer}, default: [])
     field(:item, :integer)
+    field(:color, :string)
+    field(:brand, :string)
   end
+
+  @fields ~w(status priority labels city tags owner_id reviewer_ids item color brand)a
+  @color_rules Erabi.Rules.new(create: true, pattern: "#[0-9a-fA-F]{6}")
 
   def changeset(task, params) do
     task
-    |> cast(params, [:status, :priority, :labels, :city, :tags, :owner_id, :reviewer_ids, :item])
+    |> cast(params, @fields)
     |> Erabi.Changeset.validate_choice(:status, [required: true],
       options: ErabiDev.Data.statuses()
     )
     |> Erabi.Changeset.validate_choice(:labels, @label_rules, options: ErabiDev.Data.labels())
     |> Erabi.Changeset.validate_choice(:tags, @tag_rules)
     |> Erabi.Changeset.validate_choice(:owner_id, [], options: ErabiDev.Data.people())
+    |> Erabi.Changeset.validate_choice(:color, [], options: Erabi.Option.colors())
+    |> Erabi.Changeset.validate_choice(:brand, @color_rules)
   end
 end
 
@@ -324,6 +331,14 @@ defmodule ErabiDev.PickersLive do
         <div>
           <label class="label" id="free-label">A city, or any place (create)</label>
           <.combobox name="place" value={nil} options={Data.cities()} create label_id="free-label" locale={@locale} />
+        </div>
+        <div>
+          <label class="label" id="color-label">Color</label>
+          <.color_picker field={@form[:color]} label_id="color-label" locale={@locale} />
+        </div>
+        <div>
+          <label class="label" id="brand-label">Brand color (custom)</label>
+          <.color_picker field={@form[:brand]} custom contrast="#ffffff" label_id="brand-label" locale={@locale} />
         </div>
       </div>
       <p><button type="submit">Save</button></p>

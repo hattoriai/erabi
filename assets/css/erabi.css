@@ -729,3 +729,237 @@
     outline-offset: -2px;
   }
 }
+
+/* The color picker: swatches, and a custom color's area, hue and hex. */
+
+.erabi-sample {
+  flex: none;
+  box-sizing: border-box;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  border-radius: var(--erabi-chip-radius);
+}
+
+.erabi-sample.erabi-chip {
+  justify-content: center;
+  padding: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.erabi-sample-solid {
+  background: var(--erabi-sample);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--erabi-text) 14%, transparent);
+}
+
+.erabi-sample-small {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  line-height: 1.25rem;
+  border-radius: 5px;
+}
+
+.erabi-color .erabi-values {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.erabi-color-popup {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.75rem;
+  gap: 0.75rem;
+}
+
+.erabi-swatches {
+  display: grid;
+  grid-template-columns: repeat(var(--erabi-columns, 9), minmax(0, 1fr));
+  gap: 2px;
+}
+
+.erabi-swatch {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: var(--erabi-inner-radius);
+  cursor: pointer;
+  outline: none;
+}
+
+.erabi-swatch:hover {
+  background: var(--erabi-active);
+}
+
+.erabi-swatch:focus-visible {
+  box-shadow: var(--erabi-focus-ring);
+}
+
+.erabi-swatch[aria-selected="true"] .erabi-sample {
+  box-shadow: 0 0 0 2px var(--erabi-background), 0 0 0 3.5px var(--erabi-text);
+}
+
+.erabi-custom {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--erabi-border);
+}
+
+.erabi-custom > .erabi-heading {
+  min-height: 0;
+  padding: 0;
+}
+
+.erabi-area {
+  position: relative;
+  aspect-ratio: 224 / 136;
+  border-radius: var(--erabi-inner-radius);
+  background: var(--erabi-surface);
+  touch-action: none;
+  cursor: crosshair;
+  outline: none;
+}
+
+.erabi-area-canvas {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: inherit;
+}
+
+.erabi-hue {
+  position: relative;
+  block-size: 0.75rem;
+  border-radius: 999px;
+  /* Hues at an even lightness and chroma, in OKLCH where the browser has it. */
+  background: linear-gradient(to right, #e5484d, #f76b15, #ffc53d, #46a758, #12a594, #0090ff, #6e56cf, #d6409f, #e5484d);
+  background: linear-gradient(to right in oklch longer hue, oklch(0.7 0.16 0), oklch(0.7 0.16 360));
+  touch-action: none;
+  cursor: pointer;
+  outline: none;
+}
+
+.erabi-thumb {
+  position: absolute;
+  inline-size: 0.875rem;
+  block-size: 0.875rem;
+  box-sizing: border-box;
+  translate: -50% -50%;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+.erabi-hue .erabi-thumb {
+  top: 50%;
+  background: transparent;
+}
+
+.erabi-area:focus-visible .erabi-thumb,
+.erabi-hue:focus-visible .erabi-thumb {
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35), 0 0 0 3px var(--erabi-accent);
+}
+
+.erabi-hex-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.erabi-preview {
+  flex: none;
+  inline-size: 2rem;
+  block-size: 2rem;
+  border-radius: var(--erabi-inner-radius);
+  background: var(--erabi-sample);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--erabi-text) 14%, transparent);
+}
+
+.erabi-hex {
+  flex: 1;
+  min-width: 0;
+  block-size: 2rem;
+  box-sizing: border-box;
+  padding: 0 0.5rem;
+  border: 1px solid var(--erabi-border);
+  border-radius: var(--erabi-inner-radius);
+  background: var(--erabi-background);
+  color: var(--erabi-text);
+  font: inherit;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--erabi-small);
+}
+
+.erabi-hex:focus {
+  outline: none;
+  border-color: var(--erabi-accent);
+  box-shadow: 0 0 0 1px var(--erabi-accent);
+}
+
+.erabi-hex[aria-invalid="true"] {
+  border-color: var(--erabi-invalid);
+}
+
+.erabi-dropper {
+  flex: none;
+  display: grid;
+  place-items: center;
+  inline-size: 2rem;
+  block-size: 2rem;
+  padding: 0;
+  border: 1px solid var(--erabi-border);
+  border-radius: var(--erabi-inner-radius);
+  background: var(--erabi-background);
+  color: var(--erabi-muted);
+  cursor: pointer;
+}
+
+.erabi-dropper:hover {
+  color: var(--erabi-text);
+  border-color: var(--erabi-border-hover);
+}
+
+.erabi-dropper:focus-visible {
+  outline: none;
+  box-shadow: var(--erabi-focus-ring);
+}
+
+.erabi-recent {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.erabi-recent[hidden] {
+  display: none;
+}
+
+.erabi-recent-color {
+  display: grid;
+  place-items: center;
+  padding: 0.125rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.erabi-recent-color:hover {
+  background: var(--erabi-active);
+}
+
+.erabi-recent-color:focus-visible {
+  outline: none;
+  box-shadow: var(--erabi-focus-ring);
+}
+
+.erabi-ratio {
+  margin: 0;
+  color: var(--erabi-muted);
+  font-size: var(--erabi-small);
+  font-variant-numeric: tabular-nums;
+}

@@ -4,7 +4,16 @@
 // (erabi:set, erabi:results, erabi:refresh, erabi:open, erabi:close,
 // erabi:focus) to the picker they name.
 
+import { ColorPicker } from "./colorpicker";
+import { readConfig } from "./config";
 import { Picker, type Transport } from "./picker";
+
+type AnyPicker = Picker | ColorPicker;
+
+/** The picker of an element, by its kind. */
+function make(el: HTMLElement, transport: Transport | null): AnyPicker {
+  return readConfig(el).kind === "color" ? new ColorPicker(el, transport) : new Picker(el, transport);
+}
 
 interface HookContext {
   el: HTMLElement;
@@ -14,22 +23,22 @@ interface HookContext {
 }
 
 interface ErabiHook extends HookContext {
-  picker?: Picker;
+  picker?: AnyPicker;
 }
 
 const SERVER_EVENTS = ["erabi:set", "erabi:results", "erabi:refresh", "erabi:open", "erabi:close", "erabi:focus", "erabi:people"];
 
-function onServerEvent(picker: Picker, event: string, payload: Record<string, unknown>): void {
+function onServerEvent(picker: AnyPicker, event: string, payload: Record<string, unknown>): void {
   if (payload.id !== picker.id) return;
   switch (event) {
     case "erabi:set":
       picker.set(((payload.value ?? []) as unknown[]).map(String));
       break;
     case "erabi:results":
-      picker.receive(payload);
+      if (picker instanceof Picker) picker.receive(payload);
       break;
     case "erabi:refresh":
-      picker.refreshSearch();
+      if (picker instanceof Picker) picker.refreshSearch();
       break;
     case "erabi:open":
       picker.open();
@@ -41,7 +50,7 @@ function onServerEvent(picker: Picker, event: string, payload: Record<string, un
       picker.focus();
       break;
     case "erabi:people":
-      picker.setPeers((payload.people ?? []) as Parameters<Picker["setPeers"]>[0], (payload.holder ?? null) as Parameters<Picker["setPeers"]>[1]);
+      if (picker instanceof Picker) picker.setPeers((payload.people ?? []) as Parameters<Picker["setPeers"]>[0], (payload.holder ?? null) as Parameters<Picker["setPeers"]>[1]);
       break;
   }
 }
@@ -61,7 +70,7 @@ export const Erabi = {
         hook.pushEventTo(selector, event, payload);
       },
     };
-    hook.picker = new Picker(hook.el, transport);
+    hook.picker = make(hook.el, transport);
     for (const event of SERVER_EVENTS) {
       hook.handleEvent(event, (payload) => {
         if (hook.picker) onServerEvent(hook.picker, event, payload);
@@ -79,18 +88,18 @@ export const Erabi = {
   },
 };
 
-const mounted = new WeakMap<HTMLElement, Picker>();
+const mounted = new WeakMap<HTMLElement, AnyPicker>();
 
 /**
  * Mounts the pickers under `root` on a page without a LiveSocket (a
  * controller's template): the same pickers, without a search on the
  * server. Returns them; a picker already mounted is skipped.
  */
-export function mountErabi(root: ParentNode = document): Picker[] {
-  const pickers: Picker[] = [];
+export function mountErabi(root: ParentNode = document): AnyPicker[] {
+  const pickers: AnyPicker[] = [];
   for (const element of root.querySelectorAll<HTMLElement>('[phx-hook="Erabi"]')) {
     if (mounted.has(element)) continue;
-    const picker = new Picker(element, null);
+    const picker = make(element, null);
     mounted.set(element, picker);
     pickers.push(picker);
   }

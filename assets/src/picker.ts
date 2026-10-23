@@ -8,6 +8,7 @@
 import { option, readConfig, readValue, Words, type Config, type Holder, type Kind, type Option, type Peer } from "./config";
 import { el, icon, initials } from "./dom";
 import { Listbox, choosable, type Row } from "./listbox";
+import { writeNative } from "./native";
 import { fold, rank, score } from "./match";
 import { Popup } from "./popup";
 import { checkValue, type Refusal } from "./rules";
@@ -345,30 +346,7 @@ export class Picker {
 
   /** Writes the value into the native control that the form posts, and tells the form. */
   private writeNative(notify: boolean): void {
-    const native = this.native;
-    if (!native) return;
-    if (native instanceof HTMLSelectElement) {
-      const have = new Set(Array.from(native.options, (o) => o.value));
-      for (const value of this.value) {
-        if (!have.has(value)) native.append(el("option", { value }, this.optionOf(value).label));
-      }
-      const chosen = new Set(this.value);
-      for (const o of Array.from(native.options)) o.selected = o.value === "" ? chosen.size === 0 && !native.multiple : chosen.has(o.value);
-      // A form posts a select's values in the order of its options: the
-      // chosen ones go last, in the order people chose them.
-      if (native.multiple) {
-        for (const value of this.value) {
-          const o = Array.from(native.options).find((x) => x.value === value);
-          if (o) native.append(o);
-        }
-      }
-    } else {
-      native.value = this.value[0] ?? "";
-    }
-    if (notify) {
-      native.dispatchEvent(new Event("input", { bubbles: true }));
-      native.dispatchEvent(new Event("change", { bubbles: true }));
-    }
+    writeNative(this.native, this.value, (value) => this.optionOf(value).label, notify);
   }
 
   private add(o: Option): void {
