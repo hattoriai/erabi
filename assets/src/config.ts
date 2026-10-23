@@ -3,7 +3,7 @@
 
 import type { Rules } from "./rules";
 
-export type Kind = "select" | "multi_select" | "combobox" | "tags" | "person" | "color";
+export type Kind = "select" | "multi_select" | "combobox" | "tags" | "person" | "color" | "emoji" | "icon";
 
 /** An option as the server sends it (Erabi.Option.to_wire/1). */
 export interface WireOption {
@@ -88,6 +88,10 @@ export interface Config {
   issho?: { target: string };
   /** A color picker's background, as #rrggbb: the custom colors show their contrast with it. */
   contrast?: string;
+  /** An emoji picker's data, for the page's language (Erabi.Emoji). */
+  emojiData?: string;
+  /** An emoji picker without skin tones. */
+  noTones?: boolean;
 }
 
 /** Who holds a picker's lock, with Issho: someone else, or this person (`mine`). */

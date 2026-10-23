@@ -53,11 +53,31 @@ defmodule Mix.Tasks.Erabi.InstallTest do
   import_config "#{config_env()}.exs"
   """
 
+  @endpoint ~S"""
+  defmodule MyAppWeb.Endpoint do
+    use Phoenix.Endpoint, otp_app: :my_app
+
+    socket "/live", Phoenix.LiveView.Socket,
+      websocket: [connect_info: [session: @session_options]],
+      longpoll: [connect_info: [session: @session_options]]
+
+    # Serve at "/" the static files from "priv/static" directory.
+    plug Plug.Static,
+      at: "/",
+      from: :my_app,
+      gzip: not code_reloading?,
+      only: MyAppWeb.static_paths()
+
+    plug MyAppWeb.Router
+  end
+  """
+
   # config/config.exs is read for the esbuild note, and never edited.
   @files [
     {@app_js, "assets/js/app.js"},
     {@app_css, "assets/css/app.css"},
-    {@config_exs, "config/config.exs"}
+    {@config_exs, "config/config.exs"},
+    {@endpoint, "lib/my_app_web/endpoint.ex"}
   ]
 
   setup do
@@ -95,7 +115,7 @@ defmodule Mix.Tasks.Erabi.InstallTest do
 
   defp snapshot(root), do: Map.new(@files, fn {_fixture, path} -> {path, read(root, path)} end)
 
-  test "edits the two files and prints the notes", %{root: root} do
+  test "edits the three files and prints the notes", %{root: root} do
     config = read(root, "config/config.exs")
     output = run(root)
 
@@ -109,6 +129,17 @@ defmodule Mix.Tasks.Erabi.InstallTest do
              "/* @import \"../../deps/erabi/priv/static/erabi-sumi.css\"; */"
 
     assert read(root, "config/config.exs") == config
+
+    assert read(root, "lib/my_app_web/endpoint.ex") =~ """
+             # The emoji of Erabi's emoji picker (Erabi.Emoji).
+             plug Plug.Static, at: "/erabi/emoji", from: {:erabi, "priv/emoji"}, gzip: true
+
+             # Serve at "/" the static files from "priv/static" directory.
+             plug Plug.Static,
+           """
+
+    assert output =~ "* updating lib/my_app_web/endpoint.ex"
+    assert output =~ ~s(import "erabi/emoji")
 
     assert output =~ "* updating assets/js/app.js"
     assert output =~ "* updating assets/css/app.css"
@@ -128,6 +159,7 @@ defmodule Mix.Tasks.Erabi.InstallTest do
     assert output =~ "Erabi is already installed. Nothing changed."
     assert output =~ "* unchanged assets/js/app.js"
     assert output =~ "* unchanged assets/css/app.css"
+    assert output =~ "* unchanged lib/my_app_web/endpoint.ex"
     refute output =~ "* updating"
   end
 

@@ -5,7 +5,7 @@
 
 import type { Config, Kind, WireOption } from "./config";
 import { el, uid } from "./dom";
-import { kindOf, type AnyPicker } from "./kinds";
+import { isSeparate, kindOf, type AnyPicker } from "./kinds";
 import { Picker } from "./picker";
 import type { Rules } from "./rules";
 
@@ -31,7 +31,7 @@ export interface CellEditor {
   destroy(): void;
 }
 
-const KINDS: Kind[] = ["select", "multi_select", "combobox", "tags", "person", "color"];
+const KINDS: Kind[] = ["select", "multi_select", "combobox", "tags", "person", "color", "emoji"];
 
 /** The options of `Erabi.cell_editor/2`, as the column gives them. */
 interface EditorOptions {
@@ -44,6 +44,9 @@ interface EditorOptions {
   placeholder?: string;
   /** A color picker's background, for the contrast of custom colors. */
   contrast?: string;
+  /** An emoji picker's data (Erabi.Emoji.url/1). */
+  emojiData?: string;
+  noTones?: boolean;
 }
 
 function values(value: CellValue): string[] {
@@ -72,16 +75,28 @@ export function cellEditor(kind: Kind): (context: CellEditorContext) => CellEdit
       me: options.me,
       placeholder: options.placeholder,
       contrast: options.contrast,
+      emojiData: options.emojiData,
+      noTones: options.noTones,
     };
-    // A color picker that the app did not import ("erabi/color") is a
-    // select of its palette.
-    const Color = kind === "color" ? kindOf("color") : null;
-    if (kind === "color" && !Color) config.kind = "select";
+    // A picker of an entry the app did not import ("erabi/color",
+    // "erabi/emoji") is a select of its options.
+    const Separate = isSeparate(kind) ? kindOf(kind) : null;
+    if (isSeparate(kind) && !Separate) config.kind = "select";
     const host = el("div", { id, class: `erabi erabi-${config.kind} erabi-cell`, "data-config": JSON.stringify(config), "data-value": JSON.stringify(values(context.value)) });
     context.element.append(host);
-    const picker: AnyPicker = Color ? new Color(host, null) : new Picker(host, null);
+    const picker: AnyPicker = Separate ? new Separate(host, null) : new Picker(host, null);
 
-    if (Color) {
+    if (Separate && kind === "emoji") {
+      // An emoji is saved as it is chosen; closed with none, the edit is cancelled.
+      let chosen = false;
+      host.addEventListener("erabi:change", () => {
+        chosen = true;
+        context.commit(picker.get()[0] ?? null);
+      });
+      host.addEventListener("erabi:closed", () => {
+        if (!chosen) context.cancel();
+      });
+    } else if (Separate) {
       // A color is saved as its popup closes, so that a drag in its area
       // saves once; closed with no change, the edit is cancelled.
       const before = values(context.value)[0] ?? null;

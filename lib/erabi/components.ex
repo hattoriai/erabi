@@ -1,7 +1,8 @@
 defmodule Erabi.Components do
   @moduledoc """
   The pickers: `select/1`, `multi_select/1`, `combobox/1`, `tags/1`,
-  `person_picker/1` and `color_picker/1`.
+  `person_picker/1`, `color_picker/1`, `emoji_picker/1` and
+  `icon_picker/1`.
 
       import Erabi.Components
 
@@ -11,6 +12,7 @@ defmodule Erabi.Components do
       <.tags field={@form[:tags]} options={@tags} create />
       <.person_picker field={@form[:owner_id]} people={@members} me={@current_user} />
       <.color_picker field={@form[:color]} custom />
+      <.emoji_picker field={@form[:icon]} />
 
   Each picker is a field of a form: it posts what the browser's own
   `<select>` would (`name`, or `name[]` for several values), works with
@@ -28,7 +30,7 @@ defmodule Erabi.Components do
 
   alias Erabi.{Messages, Option, Rules}
 
-  @kinds [:select, :multi_select, :combobox, :tags, :person, :color]
+  @kinds [:select, :multi_select, :combobox, :tags, :person, :color, :emoji, :icon]
 
   # Lists of more options than this have a box to filter them, unless
   # `filter` says otherwise.
@@ -139,6 +141,62 @@ defmodule Erabi.Components do
     |> picker()
   end
 
+  @doc """
+  A picker of an emoji, as Notion's page icons and Slack's reactions:
+  every emoji by category, a search in the page's language (names, tags
+  and `:shortcodes:`), skin tones, the person's recent emoji, and a
+  preview. It posts the emoji itself (`"🎉"`, in the chosen skin tone).
+
+  With `options` that have an `:icon` (drawn by the `:icon` slot), it has
+  a second tab of the app's icons, which post their values.
+
+      <.emoji_picker field={@form[:icon]} />
+      <.emoji_picker field={@form[:icon]} options={@icons}>
+        <:icon :let={name}><.lucide name={name} /></:icon>
+      </.emoji_picker>
+
+  The emoji are a file of the page's language, which the picker fetches
+  as it first opens: serve them as `Erabi.Emoji` says. Check the value
+  with `Erabi.Emoji.options/1`. The picker is in its own entry:
+  `import "erabi/emoji"`.
+  """
+  shared_attrs()
+  attr :tones, :boolean, default: true, doc: "whether people may choose a skin tone"
+
+  def emoji_picker(assigns) do
+    assigns |> emoji_assigns() |> prepare(:emoji, false) |> picker()
+  end
+
+  @doc """
+  A picker of one of the app's icons: a grid of the `options` that have an
+  `:icon`, drawn by the `:icon` slot, with a search by their labels and
+  keywords. It posts the option's value.
+
+      <.icon_picker field={@form[:icon]} options={@icons}>
+        <:icon :let={name}><.lucide name={name} /></:icon>
+      </.icon_picker>
+
+  The picker is in its own entry: `import "erabi/emoji"`.
+  """
+  shared_attrs()
+  def icon_picker(assigns), do: assigns |> prepare(:icon, false) |> picker()
+
+  # The chosen emoji, named in the page's language, for the field before
+  # the data comes, and for the native select.
+  defp emoji_assigns(assigns) do
+    locale = locale(assigns)
+    raw = if assigns.field, do: assigns.field.value, else: assigns.value
+    value = raw |> value_list(false) |> Option.params() |> List.first()
+
+    selected =
+      case value && Erabi.Emoji.name(value, locale) do
+        nil -> []
+        name -> [%{value: value, label: name}]
+      end
+
+    assign(assigns, selected: selected ++ assigns.selected, emoji_url: Erabi.Emoji.url(locale))
+  end
+
   defp rule_list(nil), do: []
   defp rule_list(%Rules{} = rules), do: rules |> Map.from_struct() |> Map.to_list()
   defp rule_list(rules), do: Enum.to_list(rules)
@@ -149,7 +207,7 @@ defmodule Erabi.Components do
     ~H"""
     <div
       id={@id}
-      class={["erabi", "erabi-#{@kind}", @class]}
+      class={["erabi", kind_class(@kind), @class]}
       phx-hook="Erabi"
       phx-update="ignore"
       data-config={@config}
@@ -196,6 +254,10 @@ defmodule Erabi.Components do
     """
   end
 
+  # The class of a kind: `erabi-icon` is the class of an icon itself.
+  defp kind_class(:icon), do: "erabi-icon-picker"
+  defp kind_class(kind), do: "erabi-#{kind}"
+
   defp prepare(assigns, kind, multiple) when kind in @kinds do
     rules = rules(assigns)
     options = Option.list(assigns.options)
@@ -234,7 +296,9 @@ defmodule Erabi.Components do
       "onChange" => assigns.on_change,
       "icons" => assigns.icon != [],
       "issho" => issho_join && %{"target" => "##{id}-issho"},
-      "contrast" => assigns[:contrast]
+      "contrast" => assigns[:contrast],
+      "emojiData" => assigns[:emoji_url],
+      "noTones" => assigns[:tones] == false
     }
 
     assign(assigns,

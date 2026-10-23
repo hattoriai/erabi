@@ -1,5 +1,5 @@
 defmodule Mix.Tasks.Erabi.ReleaseCheck do
-  @shortdoc "Checks that priv/static holds the six bundle files and nothing else"
+  @shortdoc "Checks that priv/static holds the eight bundle files and nothing else"
 
   @moduledoc """
   Checks the built files before a release of Erabi.
@@ -10,18 +10,22 @@ defmodule Mix.Tasks.Erabi.ReleaseCheck do
   after `mix erabi.build` and before `mix hex.publish`. In any project
   but Erabi, it stops with an error. It fails when:
 
-    * one of the six bundle files (`erabi.esm.js`, `erabi.cjs.js`,
-      `erabi-color.esm.js`, `erabi-color.cjs.js`, `erabi.css` and
+    * one of the eight bundle files (`erabi.esm.js`, `erabi.cjs.js`,
+      `erabi-color.esm.js`, `erabi-color.cjs.js`, `erabi-emoji.esm.js`,
+      `erabi-emoji.cjs.js`, `erabi.css` and
       `erabi-sumi.css`) is missing from `priv/static`,
       or is empty (the empty files that CI makes are not a build);
     * `priv/static` holds any other file or directory;
+    * the emoji data of a language (`priv/emoji/emoji-<language>.json`,
+      and its `.gz`) is missing or empty (`npm run emoji` in `assets/`
+      makes it);
     * the `version` of `package.json` is not the version of `mix.exs`.
   """
 
   use Mix.Task
 
   @static "priv/static"
-  @files ~w(erabi.esm.js erabi.cjs.js erabi-color.esm.js erabi-color.cjs.js erabi.css erabi-sumi.css)
+  @files ~w(erabi.esm.js erabi.cjs.js erabi-color.esm.js erabi-color.cjs.js erabi-emoji.esm.js erabi-emoji.cjs.js erabi.css erabi-sumi.css)
 
   @impl Mix.Task
   def run(_args) do
@@ -29,10 +33,17 @@ defmodule Mix.Tasks.Erabi.ReleaseCheck do
     ensure_erabi!(config)
     version = config[:version]
 
-    case check(@static, "package.json", version) do
+    result =
+      case {check(@static, "package.json", version), emoji_problems("priv/emoji")} do
+        {:ok, []} -> :ok
+        {:ok, emoji} -> {:error, emoji}
+        {{:error, problems}, emoji} -> {:error, problems ++ emoji}
+      end
+
+    case result do
       :ok ->
         Mix.shell().info(
-          "#{@static} holds the six bundle files, and nothing else, and package.json has version #{version}"
+          "#{@static} holds the eight bundle files, and nothing else, and package.json has version #{version}"
         )
 
       {:error, problems} ->
@@ -85,6 +96,17 @@ defmodule Mix.Tasks.Erabi.ReleaseCheck do
       File.stat!(path).size == 0 -> ["#{path} is empty"]
       true -> []
     end
+  end
+
+  @doc false
+  @spec emoji_problems(Path.t()) :: [String.t()]
+  def emoji_problems(dir) do
+    for language <- Erabi.Emoji.languages(),
+        file <- ["emoji-#{language}.json", "emoji-#{language}.json.gz"],
+        problem <- bundle_problems(dir, file, File.ls!(dir)),
+        do: problem
+  rescue
+    File.Error -> ["#{dir} is missing"]
   end
 
   defp version_problems(package_json, version) do

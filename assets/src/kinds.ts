@@ -1,4 +1,5 @@
-// The pickers that live in entries of their own ("erabi/color"): each
+// The pickers that live in entries of their own ("erabi/color",
+// "erabi/emoji"): each
 // registers its kind here when the app imports it, and the hook and the
 // cell editors make it by its kind. A page that has none of them does not
 // load their code.
@@ -25,7 +26,7 @@ export type PickerClass = new (el: HTMLElement, transport: Transport | null) => 
 const kinds = new Map<string, PickerClass>();
 
 /** The entries that hold the kinds that are not in the main bundle. */
-const ENTRIES: Record<string, string> = { color: "erabi/color" };
+const ENTRIES: Record<string, string> = { color: "erabi/color", emoji: "erabi/emoji", icon: "erabi/emoji" };
 
 /** Registers a kind of picker, from its entry. */
 export function registerKind(kind: string, picker: PickerClass): void {

@@ -12,6 +12,10 @@
     "./color": {
       "import": "./priv/static/erabi-color.esm.js",
       "require": "./priv/static/erabi-color.cjs.js"
+    },
+    "./emoji": {
+      "import": "./priv/static/erabi-emoji.esm.js",
+      "require": "./priv/static/erabi-emoji.cjs.js"
     }
   },
   "files": [

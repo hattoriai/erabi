@@ -37,7 +37,8 @@ Application.put_env(:erabi, ErabiDev.Endpoint,
     if(watch?,
       do: [
         erabi_esm: {Esbuild, :install_and_run, [:erabi_esm, ~w(--watch)]},
-        erabi_color_esm: {Esbuild, :install_and_run, [:erabi_color_esm, ~w(--watch)]}
+        erabi_color_esm: {Esbuild, :install_and_run, [:erabi_color_esm, ~w(--watch)]},
+        erabi_emoji_esm: {Esbuild, :install_and_run, [:erabi_emoji_esm, ~w(--watch)]}
       ],
       else: []
     ),
@@ -80,6 +81,18 @@ defmodule ErabiDev.Data do
       %{value: "security", label: "Security", color: :yellow},
       %{value: "good-first", label: "Good first issue", color: :green}
     ]
+  end
+
+  @icons ~w(rocket star heart book bug flag folder calendar camera code coffee compass globe house inbox key lightbulb lock mail map music package palette pen phone pin puzzle settings shield shopping-cart sparkles sun moon target terminal trophy umbrella users zap leaf gift)
+
+  # Lucide's icons (assets/node_modules/lucide-static, a dev dependency), for the icon pickers.
+  def icons do
+    for name <- @icons,
+        do: %{
+          value: name,
+          label: name |> String.replace("-", " ") |> String.capitalize(),
+          icon: name
+        }
   end
 
   def priorities do
@@ -166,10 +179,12 @@ defmodule ErabiDev.Task do
     field(:reviewer_ids, {:array, :integer}, default: [])
     field(:item, :integer)
     field(:color, :string)
+    field(:page_icon, :string)
+    field(:section_icon, :string)
     field(:brand, :string)
   end
 
-  @fields ~w(status priority labels city tags owner_id reviewer_ids item color brand)a
+  @fields ~w(status priority labels city tags owner_id reviewer_ids item color brand page_icon section_icon)a
   @color_rules Erabi.Rules.new(create: true, pattern: "#[0-9a-fA-F]{6}")
 
   def changeset(task, params) do
@@ -183,6 +198,10 @@ defmodule ErabiDev.Task do
     |> Erabi.Changeset.validate_choice(:owner_id, [], options: ErabiDev.Data.people())
     |> Erabi.Changeset.validate_choice(:color, [], options: Erabi.Option.colors())
     |> Erabi.Changeset.validate_choice(:brand, @color_rules)
+    |> Erabi.Changeset.validate_choice(:page_icon, [],
+      options: Erabi.Emoji.options(ErabiDev.Data.icons())
+    )
+    |> Erabi.Changeset.validate_choice(:section_icon, [], options: ErabiDev.Data.icons())
   end
 end
 
@@ -226,7 +245,8 @@ defmodule ErabiDev.Layouts do
               "phoenix": "/vendor/phoenix/phoenix.mjs",
               "phoenix_live_view": "/vendor/phoenix_live_view/phoenix_live_view.esm.js",
               "erabi": "/assets/erabi.esm.js",
-              "erabi/color": "/assets/erabi-color.esm.js"
+              "erabi/color": "/assets/erabi-color.esm.js",
+              "erabi/emoji": "/assets/erabi-emoji.esm.js"
             }
           }
         </script>
@@ -236,6 +256,7 @@ defmodule ErabiDev.Layouts do
           import { Erabi, mountErabi } from "erabi"
           // ?nocolor leaves out the color picker's entry, as an app that forgot it.
           if (!new URLSearchParams(location.search).has("nocolor")) await import("erabi/color")
+          await import("erabi/emoji")
 
           if (document.querySelector("[data-phx-main]")) {
             const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
@@ -343,6 +364,18 @@ defmodule ErabiDev.PickersLive do
           <.color_picker field={@form[:color]} label_id="color-label" locale={@locale} />
         </div>
         <div>
+          <label class="label" id="page-icon-label">Page icon (emoji, or an icon)</label>
+          <.emoji_picker field={@form[:page_icon]} options={Data.icons()} label_id="page-icon-label" locale={@locale}>
+            <:icon :let={name}><.lucide name={name} /></:icon>
+          </.emoji_picker>
+        </div>
+        <div>
+          <label class="label" id="section-icon-label">Section icon</label>
+          <.icon_picker field={@form[:section_icon]} options={Data.icons()} label_id="section-icon-label" locale={@locale}>
+            <:icon :let={name}><.lucide name={name} /></:icon>
+          </.icon_picker>
+        </div>
+        <div>
           <label class="label" id="brand-label">Brand color (custom)</label>
           <.color_picker field={@form[:brand]} custom contrast="#ffffff" label_id="brand-label" locale={@locale} />
         </div>
@@ -364,6 +397,20 @@ defmodule ErabiDev.PickersLive do
     <p :for={{message, opts} <- @field.errors} :if={Phoenix.Component.used_input?(@field)} class="error">
       {Enum.reduce(opts, message, fn {key, value}, acc -> String.replace(acc, "%{#{key}}", to_string(value)) end)}
     </p>
+    """
+  end
+
+  defp lucide(assigns) do
+    svg =
+      Path.expand("assets/node_modules/lucide-static/icons/#{assigns.name}.svg", __DIR__)
+      |> File.read!()
+      |> String.replace(~r/<!--.*?-->\s*/s, "")
+      |> String.replace(~r/ width="24"\s+height="24"/, ~s( width="18" height="18"))
+
+    assigns = assign(assigns, :svg, Phoenix.HTML.raw(svg))
+
+    ~H"""
+    {@svg}
     """
   end
 
@@ -561,6 +608,7 @@ defmodule ErabiDev.Endpoint do
   end
 
   plug(Plug.Static, at: "/assets", from: Path.expand("priv/static", __DIR__))
+  plug(Plug.Static, at: "/erabi/emoji", from: {:erabi, "priv/emoji"}, gzip: true)
   plug(Plug.Static, at: "/vendor/phoenix", from: {:phoenix, "priv/static"})
   plug(Plug.Static, at: "/vendor/phoenix_live_view", from: {:phoenix_live_view, "priv/static"})
 

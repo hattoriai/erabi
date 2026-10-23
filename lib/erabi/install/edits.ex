@@ -293,6 +293,52 @@ defmodule Erabi.Install.Edits do
 
   ## assets/css/app.css
 
+  @static_plug ~s(plug Plug.Static, at: "/erabi/emoji", from: {:erabi, "priv/emoji"}, gzip: true)
+
+  @doc false
+  # The emoji data of the emoji picker, served by the endpoint: above its
+  # first Plug.Static, with the same indent.
+  @spec endpoint(String.t()) :: result()
+  def endpoint(source) when is_binary(source) do
+    cond do
+      String.contains?(source, ~s({:erabi, "priv/emoji"})) ->
+        :unchanged
+
+      match = Regex.run(~r/^([ \t]*)plug\(?\s*Plug\.Static\b/m, source, return: :index) ->
+        [{at, _length}, {indent_at, indent_length}] = match
+        indent = binary_part(source, indent_at, indent_length)
+
+        line =
+          "#{indent}# The emoji of Erabi's emoji picker (Erabi.Emoji).\n#{indent}#{@static_plug}\n\n"
+
+        {:changed, splice(source, above_comments(source, at), 0, line)}
+
+      true ->
+        {:manual, endpoint_manual()}
+    end
+  end
+
+  # The start of the comment lines right above a line, or the line's.
+  defp above_comments(source, at) do
+    before = binary_part(source, 0, at)
+
+    case Regex.run(~r/(?:^[ \t]*#[^\n]*\n)+\z/m, before, return: :index) do
+      [{start, _length}] -> start
+      nil -> at
+    end
+  end
+
+  @doc false
+  @spec endpoint_manual() :: String.t()
+  def endpoint_manual do
+    """
+    Serve the emoji of the emoji picker from your endpoint, above its
+    Plug.Static:
+
+        #{@static_plug}
+    """
+  end
+
   @doc false
   @spec app_css(String.t(), String.t()) :: result()
   def app_css(source, dir \\ @package_dir) when is_binary(source) and is_binary(dir) do

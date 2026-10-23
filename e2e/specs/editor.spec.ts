@@ -119,6 +119,22 @@ test.describe("color cell editors", () => {
   });
 });
 
+test.describe("emoji cell editors", () => {
+  test.beforeEach(async ({ page }) => grid(page));
+
+  test("what a person types on the cell searches; Enter saves the emoji; Escape with none cancels", async ({ page }) => {
+    await page.evaluate(() => (window as unknown as Opener).open("erabi_emoji", null, { emojiData: "/erabi/emoji/emoji-en.json" }, "taco"));
+    await expect(page.locator("#cell .erabi-emoji-cell").first()).toHaveText("🌮");
+    await page.keyboard.press("Enter");
+    expect(await page.evaluate(() => (window as unknown as Commits).commits)).toEqual(["🌮"]);
+
+    await page.evaluate(() => (window as unknown as Opener).open("erabi_emoji", "🌮", { emojiData: "/erabi/emoji/emoji-en.json" }));
+    await expect(page.locator("#cell .erabi-emoji-cell").first()).toBeVisible();
+    await page.keyboard.press("Escape");
+    expect(await page.evaluate(() => (window as unknown as Commits).commits)).toEqual(["🌮", "cancelled"]);
+  });
+});
+
 test.describe("without erabi/color", () => {
   test("a color picker stays the browser's <select>, and says the import it needs", async ({ page }) => {
     const warnings: string[] = [];

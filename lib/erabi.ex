@@ -11,7 +11,7 @@ defmodule Erabi do
   choose, and on the server, in `Erabi.Changeset`.
   """
 
-  @kinds ~w(select multi_select combobox tags person color)a
+  @kinds ~w(select multi_select combobox tags person color emoji)a
 
   @doc ~S"""
   A picker as the editor of a grid's cells, for a column of
@@ -28,18 +28,19 @@ defmodule Erabi do
       configure({ editors: erabiEditors() })
 
   The kinds are `:select`, `:multi_select`, `:combobox`, `:tags`,
-  `:person` (with `multiple: true` for several people) and `:color`. The
+  `:person` (with `multiple: true` for several people), `:color` and
+  `:emoji`. The
   options are those of the components: `options`, `rules` and its
   shortcuts (`min`, `max`, `create`, `required`), `filter`, `me`,
-  `placeholder`, `locale` and `messages`; and for `:color`, `palette`,
+  `placeholder`, `locale` and `messages`; for `:color`, `palette`,
   `custom` and `contrast`, as `Erabi.Components.color_picker/1` takes
-  them. A picker of one value saves it as it is chosen; one of several,
+  them; and for `:emoji`, `tones`. A picker of one value saves it as it is chosen; one of several,
   when the editor closes, as the grid's own editors do; a color, when its
   popup closes, so that a drag in its area saves once.
 
-  The color editor is in the color picker's entry, which the app imports
-  too (`import "erabi/color"`); without it, a color column is a select
-  of its palette.
+  The color and emoji editors are in their pickers' entries, which the
+  app imports too (`import "erabi/color"`, `import "erabi/emoji"`);
+  without them, such a column is a select of its options.
   """
   @spec cell_editor(atom(), keyword()) :: {String.t(), map()}
   def cell_editor(kind, opts \\ []) when kind in @kinds do
@@ -60,6 +61,8 @@ defmodule Erabi do
         "rules" => Erabi.Rules.to_client(rules),
         "messages" => messages,
         "contrast" => opts[:contrast],
+        "emojiData" => if(kind == :emoji, do: Erabi.Emoji.url(locale)),
+        "noTones" => if(kind == :emoji and opts[:tones] == false, do: true),
         "multiple" => Keyword.get(opts, :multiple, false),
         "filter" => Keyword.get(opts, :filter),
         "me" => opts[:me] && Erabi.Option.param(opts[:me]),

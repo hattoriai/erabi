@@ -11,9 +11,11 @@ if config_env() == :dev do
     --external:phoenix_live_view
   )
 
-  # The color picker is an entry of its own ("erabi/color"), for the apps
-  # that have one: it takes the rest from "erabi", the page's copy.
+  # The color picker and the emoji pickers are entries of their own
+  # ("erabi/color", "erabi/emoji"), for the apps that have one: they take
+  # the rest from "erabi", the page's copy.
   color_args = ~w(src/color-entry.ts --external:erabi)
+  emoji_args = ~w(src/emoji-entry.ts --external:erabi)
 
   profile = fn args ->
     [
@@ -30,7 +32,11 @@ if config_env() == :dev do
     erabi_color_esm:
       profile.(color_args ++ ~w(--format=esm --outfile=../priv/static/erabi-color.esm.js)),
     erabi_color_cjs:
-      profile.(color_args ++ ~w(--format=cjs --outfile=../priv/static/erabi-color.cjs.js))
+      profile.(color_args ++ ~w(--format=cjs --outfile=../priv/static/erabi-color.cjs.js)),
+    erabi_emoji_esm:
+      profile.(emoji_args ++ ~w(--format=esm --outfile=../priv/static/erabi-emoji.esm.js)),
+    erabi_emoji_cjs:
+      profile.(emoji_args ++ ~w(--format=cjs --outfile=../priv/static/erabi-emoji.cjs.js))
 end
 
 if config_env() == :test do

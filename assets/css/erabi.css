@@ -38,6 +38,7 @@
   --erabi-row-height: 2.25rem;
   --erabi-space: 0.5rem;
   --erabi-icon-size: 16px;
+  --erabi-emoji-font: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
   --erabi-avatar-size: 1.375rem;
   --erabi-agent-radius: 30%;
   --erabi-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(0, 0, 0, 0.06);
@@ -962,4 +963,294 @@
   color: var(--erabi-muted);
   font-size: var(--erabi-small);
   font-variant-numeric: tabular-nums;
+}
+
+/* The emoji and icon pickers: a search, categories, a grid, a preview. */
+
+.erabi-emoji-glyph {
+  flex: none;
+  font-family: var(--erabi-emoji-font);
+  font-size: 1.125rem;
+  line-height: 1;
+}
+
+.erabi-emoji .erabi-values,
+.erabi-icon-picker .erabi-values {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.erabi-emoji-popup {
+  height: min(28rem, 100%);
+}
+
+.erabi-emoji-head {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem 0.5rem 0.25rem;
+}
+
+.erabi-emoji-head .erabi-filter-box {
+  padding: 0 0.25rem 0 0.625rem;
+  min-height: 2.25rem;
+  border: 1px solid var(--erabi-border);
+  border-radius: var(--erabi-inner-radius);
+}
+
+.erabi-emoji-head .erabi-filter-box:focus-within {
+  border-color: var(--erabi-accent);
+  box-shadow: 0 0 0 1px var(--erabi-accent);
+}
+
+.erabi-tabs {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.erabi-tab {
+  padding: 0.25rem 0.625rem;
+  border: 0;
+  border-radius: var(--erabi-inner-radius);
+  background: transparent;
+  color: var(--erabi-muted);
+  font: inherit;
+  font-size: var(--erabi-small);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.erabi-tab:hover {
+  background: var(--erabi-active);
+}
+
+.erabi-tab[aria-selected="true"] {
+  background: var(--erabi-active);
+  color: var(--erabi-text);
+}
+
+.erabi-tab:focus-visible,
+.erabi-tone:focus-visible,
+.erabi-tone-option:focus-visible,
+.erabi-emoji-category:focus-visible {
+  outline: none;
+  box-shadow: var(--erabi-focus-ring);
+}
+
+.erabi-tone {
+  flex: none;
+  display: grid;
+  place-items: center;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--erabi-inner-radius);
+  background: transparent;
+  font-family: var(--erabi-emoji-font);
+  font-size: 1.125rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.erabi-tone:hover,
+.erabi-tone[aria-expanded="true"] {
+  background: var(--erabi-active);
+}
+
+.erabi-tone[hidden] {
+  display: none;
+}
+
+.erabi-tone-menu {
+  position: absolute;
+  inset-inline-end: 0.5rem;
+  top: calc(100% - 0.25rem);
+  z-index: 2;
+  display: flex;
+  gap: 0.125rem;
+  padding: 0.25rem;
+  border-radius: var(--erabi-radius);
+  background: var(--erabi-background);
+  box-shadow: var(--erabi-shadow);
+}
+
+.erabi-tone-menu[hidden] {
+  display: none;
+}
+
+.erabi-tone-option {
+  display: grid;
+  place-items: center;
+  inline-size: 2rem;
+  block-size: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--erabi-inner-radius);
+  background: transparent;
+  font-family: var(--erabi-emoji-font);
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.erabi-tone-option:hover,
+.erabi-tone-option[aria-checked="true"] {
+  background: var(--erabi-active);
+}
+
+.erabi-emoji-nav {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 0.5rem 0.25rem;
+  border-bottom: 1px solid var(--erabi-border);
+}
+
+.erabi-emoji-nav[hidden] {
+  display: none;
+}
+
+.erabi-emoji-category {
+  display: grid;
+  place-items: center;
+  inline-size: 1.875rem;
+  block-size: 1.875rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--erabi-inner-radius);
+  background: transparent;
+  color: var(--erabi-muted);
+  cursor: pointer;
+}
+
+.erabi-emoji-category .erabi-icon {
+  width: 1.0625rem;
+  height: 1.0625rem;
+}
+
+.erabi-emoji-category:hover {
+  background: var(--erabi-active);
+  color: var(--erabi-text);
+}
+
+.erabi-emoji-category.erabi-current {
+  color: var(--erabi-accent);
+}
+
+.erabi-emoji-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 0.5rem 0.5rem;
+  scroll-padding-top: 2rem;
+  outline: none;
+}
+
+.erabi-emoji-section {
+  content-visibility: auto;
+}
+
+.erabi-emoji-heading {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 0.5rem 0.25rem 0.25rem;
+  background: var(--erabi-background);
+  color: var(--erabi-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.erabi-emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+}
+
+.erabi-emoji-cell {
+  display: grid;
+  place-items: center;
+  block-size: 2.25rem;
+  border-radius: var(--erabi-inner-radius);
+  font-family: var(--erabi-emoji-font);
+  font-size: 1.375rem;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+}
+
+.erabi-emoji-cell.erabi-active {
+  background: var(--erabi-active);
+}
+
+.erabi-emoji-cell[aria-selected="true"] {
+  background: color-mix(in oklab, var(--erabi-accent) 16%, var(--erabi-background));
+}
+
+.erabi-emoji-cell .erabi-option-icon,
+.erabi-emoji-preview .erabi-option-icon {
+  display: grid;
+  place-items: center;
+  color: var(--erabi-text);
+}
+
+.erabi-emoji-cell .erabi-option-icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.erabi-emoji-list > .erabi-status {
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 8rem;
+}
+
+.erabi-emoji-preview {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-height: 3.25rem;
+  box-sizing: border-box;
+  padding: 0.375rem 0.75rem;
+  border-top: 1px solid var(--erabi-border);
+}
+
+.erabi-emoji-preview-glyph {
+  font-family: var(--erabi-emoji-font);
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.erabi-emoji-preview .erabi-option-icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.erabi-emoji-preview-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.erabi-emoji-preview-name {
+  overflow: hidden;
+  font-size: var(--erabi-small);
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.erabi-emoji-preview-code,
+.erabi-emoji-preview-hint {
+  color: var(--erabi-muted);
+  font-size: 0.75rem;
+}
+
+@media (forced-colors: active) {
+  .erabi-emoji-cell.erabi-active,
+  .erabi-emoji-cell[aria-selected="true"] {
+    outline: 2px solid Highlight;
+  }
 }

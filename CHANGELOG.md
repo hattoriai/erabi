@@ -31,6 +31,16 @@ and Erabi follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   the console.
 - Color columns in Masu: `Erabi.cell_editor(:color, ...)`, saved as the
   popup closes; a select of the palette without `erabi/color`.
+- `emoji_picker/1`: every emoji by category, a search by name, tag and
+  `:shortcode:` in eight languages, skin tones, recent emoji, a preview,
+  emoji newer than the device draws left out, and a tab of the app's
+  icons; `icon_picker/1`, the app's icons alone. An entry of its own
+  (`import "erabi/emoji"`); its emoji, from Emojibase, a file a
+  language in `priv/emoji` that the endpoint serves and the picker
+  fetches as it first opens. `Erabi.Emoji` searches and names them on
+  the server, as the browser does, and checks a changeset's value.
+  Emoji columns in Masu: `Erabi.cell_editor(:emoji, ...)`.
+- `mix erabi.install` adds the endpoint's `Plug.Static` of the emoji.
 - Tags typed with Enter or a comma, and "Create “…”" under the rules.
 - `Erabi.Rules`, the same in the browser and in
   `Erabi.Changeset.validate_choice/4`: required, counts, creation,

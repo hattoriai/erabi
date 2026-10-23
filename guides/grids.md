@@ -18,7 +18,8 @@ rules and words resolved on the server:
 ```
 
 The kinds are `:select`, `:multi_select`, `:combobox`, `:tags`,
-`:person` (with `multiple: true` for several people) and `:color`, and
+`:person` (with `multiple: true` for several people), `:color` and
+`:emoji`, and
 the options those of the components: `options`, `rules` and its
 shortcuts, `filter`, `me`, `placeholder`, `locale` and `messages`; and
 for `:color`, `palette`, `custom` and `contrast`:
@@ -35,15 +36,18 @@ Register the editors once, in your app's JavaScript:
 import { configure } from "masu"
 import { erabiEditors } from "erabi"
 import "erabi/color" // for color columns
+import "erabi/emoji" // for emoji columns
 
 configure({ editors: erabiEditors() })
 ```
 
-Without `erabi/color`, a color column is a select of its palette.
+Without `erabi/color` or `erabi/emoji`, such a column is a select of its
+options.
 
 ## How it edits
 
-A color is saved as its popup closes (a swatch, Enter, or a click away),
+An emoji is saved as it is chosen, and a letter typed on the cell
+searches; closed with none, the edit is cancelled. A color is saved as its popup closes (a swatch, Enter, or a click away),
 so that a drag in its area saves once; closed with no change, the edit
 is cancelled. A letter that opened the editor goes to its hex box.
 

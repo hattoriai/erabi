@@ -30,7 +30,9 @@ test.describe("choosing together", () => {
     await expect(peek).toHaveAttribute("aria-hidden", "true");
     await expect(peek.locator(".erabi-active .erabi-label")).toHaveText(kenActive);
 
-    // Issho's pointers find Ken's option on Ada's screen.
+    // Issho's pointers find Ken's option on Ada's screen, once the peek
+    // has slid in: both read its row where it stays.
+    await peek.evaluate((el) => Promise.all(el.getAnimations({ subtree: true }).map((a) => a.finished)));
     const box = await ada.evaluate((option) => {
       const el = document.getElementById("status_picker") as unknown as Record<symbol, (at: unknown) => DOMRect | null>;
       const rect = el[Symbol.for("issho.locator")]!({ open: true, option });

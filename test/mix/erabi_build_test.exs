@@ -6,7 +6,7 @@ defmodule Mix.Tasks.Erabi.BuildTest do
 
   @root Path.expand("../..", __DIR__)
   @static Path.join(@root, "priv/static")
-  @files ~w(erabi.esm.js erabi.cjs.js erabi-color.esm.js erabi-color.cjs.js erabi.css erabi-sumi.css)
+  @files ~w(erabi.esm.js erabi.cjs.js erabi-color.esm.js erabi-color.cjs.js erabi-emoji.esm.js erabi-emoji.cjs.js erabi.css erabi-sumi.css)
   @exports ~w(Erabi cellEditor erabiEditors mountErabi)
 
   @moduletag :build
@@ -48,7 +48,7 @@ defmodule Mix.Tasks.Erabi.BuildTest do
     end
   end
 
-  test "priv/static holds only the six files of the package" do
+  test "priv/static holds only the eight files of the package" do
     assert @static |> File.ls!() |> Enum.sort() == Enum.sort(@files)
   end
 
@@ -87,8 +87,13 @@ defmodule Mix.Tasks.Erabi.BuildTest do
         assert "priv/static/#{file}" in files, "the package has no priv/static/#{file}"
       end
 
+      emoji =
+        for language <- Erabi.Emoji.languages(),
+            ext <- ~w(json json.gz),
+            do: "priv/emoji/emoji-#{language}.#{ext}"
+
       assert files |> Enum.filter(&String.starts_with?(&1, "priv/")) |> Enum.sort() ==
-               @files |> Enum.map(&"priv/static/#{&1}") |> Enum.sort()
+               Enum.sort(Enum.map(@files, &"priv/static/#{&1}") ++ emoji)
 
       guides =
         @root
@@ -144,6 +149,21 @@ defmodule Mix.Tasks.Erabi.BuildTest do
       esm = File.read!(Path.join(@static, "erabi-color.esm.js"))
       assert esm =~ ~r/from"erabi"/
       refute esm =~ "erabi-popup\""
+    end
+
+    test "the emoji entry takes the rest from the package too" do
+      {output, status} =
+        System.cmd(
+          "node",
+          ["-e", ~s{process.stdout.write(JSON.stringify(Object.keys(require("erabi/emoji"))))}],
+          cd: @root,
+          env: [{"NODE_PATH", Path.dirname(@root)}],
+          stderr_to_stdout: true
+        )
+
+      assert status == 0, "node could not require erabi/emoji:\n" <> output
+      assert JSON.decode!(output) == ["EmojiPicker"]
+      refute File.read!(Path.join(@static, "erabi-emoji.esm.js")) =~ "erabi-popup\""
     end
   end
 end

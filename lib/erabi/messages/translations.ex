@@ -59,7 +59,18 @@ defmodule Erabi.Messages.Translations do
     "colorBlue" => "Blue",
     "colorPurple" => "Purple",
     "colorPink" => "Pink",
-    "colorRed" => "Red"
+    "colorRed" => "Red",
+    "emoji" => "Emoji",
+    "icons" => "Icons",
+    "searchEmoji" => "Search emoji…",
+    "skinTone" => "Skin tone",
+    "noTone" => "No skin tone",
+    "categories" => "Categories",
+    "results" => "Results",
+    "recentEmoji" => "Recent",
+    "loading" => "Loading…",
+    "pickEmoji" => "Pick an emoji",
+    "pickIcon" => "Pick an icon"
   }
 
   @translations %{
@@ -118,7 +129,18 @@ defmodule Erabi.Messages.Translations do
       "colorBlue" => "Azul",
       "colorPurple" => "Roxo",
       "colorPink" => "Rosa",
-      "colorRed" => "Vermelho"
+      "colorRed" => "Vermelho",
+      "emoji" => "Emoji",
+      "icons" => "Ícones",
+      "searchEmoji" => "Pesquisar emoji…",
+      "skinTone" => "Tom de pele",
+      "noTone" => "Sem tom de pele",
+      "categories" => "Categorias",
+      "results" => "Resultados",
+      "recentEmoji" => "Recentes",
+      "loading" => "A carregar…",
+      "pickEmoji" => "Escolha um emoji",
+      "pickIcon" => "Escolha um ícone"
     },
     "es" => %{
       "choose" => "Elegir…",
@@ -175,7 +197,18 @@ defmodule Erabi.Messages.Translations do
       "colorBlue" => "Azul",
       "colorPurple" => "Morado",
       "colorPink" => "Rosa",
-      "colorRed" => "Rojo"
+      "colorRed" => "Rojo",
+      "emoji" => "Emoji",
+      "icons" => "Iconos",
+      "searchEmoji" => "Buscar emoji…",
+      "skinTone" => "Tono de piel",
+      "noTone" => "Sin tono de piel",
+      "categories" => "Categorías",
+      "results" => "Resultados",
+      "recentEmoji" => "Recientes",
+      "loading" => "Cargando…",
+      "pickEmoji" => "Elige un emoji",
+      "pickIcon" => "Elige un icono"
     },
     "fr" => %{
       "choose" => "Choisir…",
@@ -232,7 +265,18 @@ defmodule Erabi.Messages.Translations do
       "colorBlue" => "Bleu",
       "colorPurple" => "Violet",
       "colorPink" => "Rose",
-      "colorRed" => "Rouge"
+      "colorRed" => "Rouge",
+      "emoji" => "Emoji",
+      "icons" => "Icônes",
+      "searchEmoji" => "Rechercher un emoji…",
+      "skinTone" => "Teint",
+      "noTone" => "Sans teint",
+      "categories" => "Catégories",
+      "results" => "Résultats",
+      "recentEmoji" => "Récents",
+      "loading" => "Chargement…",
+      "pickEmoji" => "Choisissez un emoji",
+      "pickIcon" => "Choisissez une icône"
     },
     "de" => %{
       "choose" => "Auswählen…",
@@ -289,7 +333,18 @@ defmodule Erabi.Messages.Translations do
       "colorBlue" => "Blau",
       "colorPurple" => "Lila",
       "colorPink" => "Rosa",
-      "colorRed" => "Rot"
+      "colorRed" => "Rot",
+      "emoji" => "Emoji",
+      "icons" => "Symbole",
+      "searchEmoji" => "Emoji suchen…",
+      "skinTone" => "Hautfarbe",
+      "noTone" => "Ohne Hautfarbe",
+      "categories" => "Kategorien",
+      "results" => "Ergebnisse",
+      "recentEmoji" => "Zuletzt verwendet",
+      "loading" => "Wird geladen…",
+      "pickEmoji" => "Wähle ein Emoji",
+      "pickIcon" => "Wähle ein Symbol"
     },
     "it" => %{
       "choose" => "Scegli…",
@@ -346,7 +401,18 @@ defmodule Erabi.Messages.Translations do
       "colorBlue" => "Blu",
       "colorPurple" => "Viola",
       "colorPink" => "Rosa",
-      "colorRed" => "Rosso"
+      "colorRed" => "Rosso",
+      "emoji" => "Emoji",
+      "icons" => "Icone",
+      "searchEmoji" => "Cerca emoji…",
+      "skinTone" => "Tonalità della pelle",
+      "noTone" => "Nessuna tonalità",
+      "categories" => "Categorie",
+      "results" => "Risultati",
+      "recentEmoji" => "Recenti",
+      "loading" => "Caricamento…",
+      "pickEmoji" => "Scegli un'emoji",
+      "pickIcon" => "Scegli un'icona"
     },
     "nl" => %{
       "choose" => "Kiezen…",
@@ -403,7 +469,18 @@ defmodule Erabi.Messages.Translations do
       "colorBlue" => "Blauw",
       "colorPurple" => "Paars",
       "colorPink" => "Roze",
-      "colorRed" => "Rood"
+      "colorRed" => "Rood",
+      "emoji" => "Emoji",
+      "icons" => "Pictogrammen",
+      "searchEmoji" => "Emoji zoeken…",
+      "skinTone" => "Huidskleur",
+      "noTone" => "Geen huidskleur",
+      "categories" => "Categorieën",
+      "results" => "Resultaten",
+      "recentEmoji" => "Recent",
+      "loading" => "Laden…",
+      "pickEmoji" => "Kies een emoji",
+      "pickIcon" => "Kies een pictogram"
     },
     "ja" => %{
       "choose" => "選択…",
@@ -460,7 +537,18 @@ defmodule Erabi.Messages.Translations do
       "colorBlue" => "ブルー",
       "colorPurple" => "パープル",
       "colorPink" => "ピンク",
-      "colorRed" => "レッド"
+      "colorRed" => "レッド",
+      "emoji" => "絵文字",
+      "icons" => "アイコン",
+      "searchEmoji" => "絵文字を検索…",
+      "skinTone" => "肌の色",
+      "noTone" => "肌の色なし",
+      "categories" => "カテゴリ",
+      "results" => "検索結果",
+      "recentEmoji" => "最近使った絵文字",
+      "loading" => "読み込み中…",
+      "pickEmoji" => "絵文字を選択",
+      "pickIcon" => "アイコンを選択"
     }
   }
 

@@ -7,7 +7,7 @@ defmodule Mix.Tasks.Erabi.Install do
       $ mix erabi.install
       $ mix erabi.install --dry-run
 
-  The task edits two files:
+  The task edits three files:
 
     * `assets/js/app.js` - adds `import { Erabi } from "erabi"` and puts
       `Erabi` in the `hooks` of the `LiveSocket`. When it cannot find the
@@ -20,6 +20,8 @@ defmodule Mix.Tasks.Erabi.Install do
       an umbrella child or with `MIX_DEPS_PATH`. For a path dependency
       (`{:erabi, path: "../erabi"}`), which Mix does not copy into
       `deps/`, the imports point at the dependency's directory instead.
+    * `lib/my_app_web/endpoint.ex` - serves the emoji of the emoji picker
+      (`Erabi.Emoji`), with a `Plug.Static` above the endpoint's own.
 
   Then it prints the esbuild note (the app's esbuild must resolve `erabi`
   through `NODE_PATH`: from `deps/`, or, for a path dependency, from the
@@ -60,7 +62,8 @@ defmodule Mix.Tasks.Erabi.Install do
 
     results = [
       edit(@js, &Edits.app_js/1, Edits.app_js_manual(), dry_run?),
-      edit(@css, &Edits.app_css(&1, css_dir), Edits.app_css_manual(css_dir), dry_run?)
+      edit(@css, &Edits.app_css(&1, css_dir), Edits.app_css_manual(css_dir), dry_run?),
+      edit(endpoint_path(), &Edits.endpoint/1, Edits.endpoint_manual(), dry_run?)
     ]
 
     if Enum.all?(results, &(&1 == :unchanged)) do
@@ -80,6 +83,14 @@ defmodule Mix.Tasks.Erabi.Install do
     case deps_paths[:erabi] do
       nil -> Path.expand(Path.join(deps_path, "erabi"))
       path -> Path.expand(path)
+    end
+  end
+
+  # The endpoint of the app's web module: lib/my_app_web/endpoint.ex.
+  defp endpoint_path do
+    case Path.wildcard("lib/*_web/endpoint.ex") do
+      [path | _] -> path
+      [] -> "lib/<app>_web/endpoint.ex"
     end
   end
 
@@ -136,11 +147,13 @@ defmodule Mix.Tasks.Erabi.Install do
     A picker with `search` runs it in its LiveView: add `on_mount Erabi.Live`
     to the LiveView (or to its live_session).
 
-    The color picker is an entry of its own, so that pages without one do
-    not load it. If you use `color_picker` (or a color column in Masu), add
-    this line below the import of "erabi" in assets/js/app.js:
+    The color picker and the emoji pickers are entries of their own, so
+    that pages without one do not load them. If you use `color_picker`,
+    `emoji_picker` or `icon_picker` (or such a column in Masu), add their
+    lines below the import of "erabi" in assets/js/app.js:
 
         import "erabi/color"
+        import "erabi/emoji"
 
     On a page without LiveView, the hook does not run. Import mountErabi
     in the page's script and call it after the page loads:

@@ -5,11 +5,14 @@
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "node scripts/test.mjs"
+    "test": "node scripts/test.mjs",
+    "emoji": "node scripts/emoji.mjs"
   },
   "devDependencies": {
     "@types/node": "22.18.0",
+    "emojibase-data": "18.0.0",
     "esbuild": "0.28.2",
+    "lucide-static": "1.61.0",
     "typescript": "7.0.2"
   }
 }

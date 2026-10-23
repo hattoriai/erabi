@@ -83,6 +83,9 @@ defmodule Erabi.MixProject do
         priv/static/erabi.cjs.js
         priv/static/erabi-color.esm.js
         priv/static/erabi-color.cjs.js
+        priv/static/erabi-emoji.esm.js
+        priv/static/erabi-emoji.cjs.js
+        priv/emoji
         priv/static/erabi.css
         priv/static/erabi-sumi.css
         package.json
@@ -126,7 +129,7 @@ defmodule Erabi.MixProject do
         Reference: ["guides/accessibility.md", "guides/limits.md"]
       ],
       groups_for_modules: [
-        Pickers: [Erabi, Erabi.Components, Erabi.Option, Erabi.Live, Erabi.Messages],
+        Pickers: [Erabi, Erabi.Components, Erabi.Option, Erabi.Live, Erabi.Messages, Erabi.Emoji],
         Rules: [Erabi.Rules, Erabi.Changeset, Erabi.Match],
         "With Issho": [Erabi.Issho],
         Testing: [Erabi.Test]

@@ -8,7 +8,11 @@ under the same copyright and license.
 This product includes icons from Lucide (https://lucide.dev): the shapes
 of "chevron-down", "x", "check", "plus" and "search", copied into
 assets/src/dom.ts and built into priv/static/erabi.esm.js and
-priv/static/erabi.cjs.js. Lucide is licensed as follows.
+priv/static/erabi.cjs.js; of "pipette", in assets/src/colorpicker.ts and
+priv/static/erabi-color.*.js; and of "clock", "smile", "hand", "cat",
+"apple", "car", "volleyball", "lightbulb", "heart" and "flag", in
+assets/src/emojipicker.ts and priv/static/erabi-emoji.*.js. Lucide is
+licensed as follows.
 
 ISC License
 
@@ -35,6 +39,37 @@ as follows.
 The MIT License (MIT) (for the icons listed above)
 
 Copyright (c) 2013-present Cole Bemis
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+The emoji data of priv/emoji (emoji, names, tags, groups, skin tones and
+GitHub's shortcodes) is made by assets/scripts/emoji.mjs from
+emojibase-data (https://emojibase.dev), whose names and tags come from
+the Unicode Common Locale Data Repository (CLDR,
+https://cldr.unicode.org), under the Unicode License v3
+(https://www.unicode.org/license.txt). Emojibase is licensed as follows.
+
+MIT License
+
+Copyright (c) 2017-2019 Miles Johnson
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

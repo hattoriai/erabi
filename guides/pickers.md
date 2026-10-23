@@ -99,6 +99,62 @@ The swatches are a listbox: arrows move between them in rows, Home and
 End, Enter or Space takes one. The area and the hue are sliders: arrows
 move by 1 (Shift, by 5 or 10), Enter takes the color and closes.
 
+## `emoji_picker`
+
+An emoji, as Notion's page icons and Slack's reactions take one: every
+emoji by category, a search in the page's language, skin tones, the
+person's recent emoji, and a preview of the one under the pointer or the
+keyboard. It posts the emoji itself (`"🎉"`, in the chosen tone).
+
+```heex
+<.emoji_picker field={@form[:icon]} />
+```
+
+With `options` that have an `:icon`, drawn by the `:icon` slot, it has a
+second tab, of your icons, which post their values:
+
+```heex
+<.emoji_picker field={@form[:icon]} options={@icons}>
+  <:icon :let={name}><.icon name={"hero-" <> name} /></:icon>
+</.emoji_picker>
+```
+
+The search finds an emoji by the start of a word of its name, its tags
+or its `:shortcode:` (`"thu"`, `"+1"` and `":thumbsup:"` find 👍), in
+English, Portuguese, Spanish, French, German, Italian, Dutch or Japanese,
+and stays under a few milliseconds a key. Emoji newer than the device
+draws are left out. `tones={false}` takes the skin tones away.
+
+The emoji are a file of the page's language (about 60 KB compressed),
+which the picker fetches as it first opens, or as the pointer comes near
+it, and which the browser then keeps. `mix erabi.install` serves them
+from your endpoint; see `Erabi.Emoji`. Check the value in the changeset
+with `Erabi.Emoji.options/1`:
+
+```elixir
+|> Erabi.Changeset.validate_choice(:icon, [], options: Erabi.Emoji.options(@icons))
+```
+
+On the server, `Erabi.Emoji.find/2` searches as the picker does, and
+`Erabi.Emoji.name/2` names an emoji: an agent's tool can choose an emoji
+by what it means.
+
+The keyboard: type to search; the arrows move in the grid, by rows across
+categories; Enter takes the emoji; Escape clears the search, then closes.
+The emoji and icon pickers are an entry of their own, which the app
+imports with the hook (`import "erabi/emoji"`).
+
+## `icon_picker`
+
+One of your icons: the `options` that have an `:icon`, in a grid, with a
+search by their labels and keywords. It posts the option's value.
+
+```heex
+<.icon_picker field={@form[:icon]} options={@icons}>
+  <:icon :let={name}><.icon name={"hero-" <> name} /></:icon>
+</.icon_picker>
+```
+
 ## Attributes of every picker
 
 | | |
