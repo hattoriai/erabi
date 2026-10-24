@@ -331,7 +331,7 @@ defmodule ErabiDev.Layouts do
           <nav>
             <a href="/">Pickers</a><a href="/choosing">Choosing together</a><a href="/plain">Without LiveView</a><a href="/?theme=sumi">Sumi</a><a href="/?dark=1">Dark</a><a href="/?locale=pt-PT">pt-PT</a>
           </nav>
-          <nav class="sumi-themes" aria-label="Sumi's themes">
+          <nav :if={@sumi} class="sumi-themes" aria-label="Sumi's themes">
             <span>Sumi:</span><a :for={{id, name, _, _, _, _, _, _, _, _} <- @themes} href={"?sumi=#{id}"} aria-current={@look == id && "page"}>{name}</a>
           </nav>
           {@inner_content}
