@@ -5,7 +5,7 @@ server as in the browser.
 
 ## 1. Install
 
-Add `{:erabi, "~> 0.1"}` to your deps, then:
+Add `{:erabi, "~> 0.2"}` to your deps, then:
 
 ```sh
 mix deps.get

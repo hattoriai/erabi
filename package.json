@@ -1,6 +1,6 @@
 {
   "name": "erabi",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "MIT",
   "module": "./priv/static/erabi.esm.js",
   "main": "./priv/static/erabi.cjs.js",
