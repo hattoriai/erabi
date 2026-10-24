@@ -81,7 +81,7 @@ Add `erabi` to the deps in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:erabi, "~> 0.1"}
+    {:erabi, "~> 0.2"}
   ]
 end
 ```

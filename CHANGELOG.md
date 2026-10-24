@@ -7,6 +7,8 @@ and Erabi follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-24
+
 ### Added
 
 - The Sumi theme follows Sumi's seven themes and their accents: an
@@ -25,7 +27,7 @@ and Erabi follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   in dark mode; on a system in dark mode, without a theme, the option
   colors stayed light.
 
-## [0.1.0] - Unreleased
+## [0.1.0] - 2026-10-23
 
 ### Added
 
