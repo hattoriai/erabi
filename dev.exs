@@ -7,7 +7,7 @@
 # The bundle rebuilds and the page reloads on a change.
 #
 # Query params of every page: `locale` (a BCP 47 locale), `theme=sumi`,
-# `dark=1`.
+# `dark=1`, `sumi=smoke` (any of Sumi's seven themes).
 #
 # Environment:
 #
@@ -208,17 +208,68 @@ end
 defmodule ErabiDev.Layouts do
   @moduledoc """
   The root layout: the style sheets, the import map and the LiveSocket.
-  `?theme=sumi` also loads erabi-sumi.css; `?dark=1` is the dark theme.
+  `?theme=sumi` also loads erabi-sumi.css; `?dark=1` is the dark theme;
+  `?sumi=smoke` (any of Sumi's seven themes) loads erabi-sumi.css on that
+  theme of Sumi, to see every picker in each.
   """
   use Phoenix.Component
 
+  # Sumi's themes, as the pickers read them: the page, the surface, the
+  # line, the text, the muted text, the accent and the text on it, and the
+  # error (Sumi's own CSS needs Tailwind, which this app has not; these are
+  # its values).
+  @sumi_themes [
+    {"dark", "Ink", "oklch(12% 0.003 270)", "oklch(16% 0.004 270)", "oklch(20% 0.005 270)",
+     "oklch(95% 0.012 85)", 0.5, "#e84a1c", "oklch(12% 0.003 270)", "oklch(58% 0.22 25)"},
+    {"smoke", "Smoke", "oklch(27% 0.005 270)", "oklch(30.5% 0.006 270)", "oklch(34% 0.007 270)",
+     "oklch(92% 0.01 85)", 0.62, "oklch(72% 0.13 168)", "oklch(27% 0.005 270)",
+     "oklch(58% 0.22 25)"},
+    {"stone", "Stone", "oklch(20% 0.006 70)", "oklch(23.5% 0.007 70)", "oklch(27% 0.008 70)",
+     "oklch(95% 0.01 85)", 0.52, "oklch(78% 0.13 82)", "oklch(20% 0.006 70)",
+     "oklch(58% 0.22 25)"},
+    {"lacquer", "Lacquer", "oklch(14% 0.022 25)", "oklch(18% 0.026 25)", "oklch(22% 0.03 25)",
+     "oklch(93% 0.016 75)", 0.53, "oklch(63% 0.21 24)", "oklch(14% 0.022 25)",
+     "oklch(58% 0.22 25)"},
+    {"light", "Paper", "oklch(96% 0.01 85)", "oklch(93% 0.012 85)", "oklch(89% 0.014 80)",
+     "oklch(15% 0.003 270)", 0.65, "#e84a1c", "oklch(12% 0.003 270)", "oklch(55% 0.22 25)"},
+    {"snow", "Snow", "oklch(99.5% 0.001 270)", "oklch(97% 0.003 270)", "oklch(92.5% 0.005 270)",
+     "oklch(20% 0.006 270)", 0.65, "oklch(50% 0.17 262)", "oklch(100% 0 0)",
+     "oklch(55% 0.22 25)"},
+    {"silk", "Silk", "oklch(97.5% 0.012 350)", "oklch(95% 0.016 350)", "oklch(91.5% 0.02 350)",
+     "oklch(22% 0.012 350)", 0.65, "oklch(56% 0.21 358)", "oklch(100% 0 0)", "oklch(55% 0.22 25)"}
+  ]
+
+  defp sumi_style(id) do
+    case List.keyfind(@sumi_themes, id, 0) do
+      {_, _, page, surface, line, text, muted, accent, on_accent, error} ->
+        """
+        :root {
+          --color-base-100: #{page}; --color-base-200: #{surface}; --color-base-300: #{line};
+          --color-base-content: #{text}; --sumi-text-muted: oklch(from #{text} l c h / #{muted});
+          --color-sumi-blade: #{accent}; --color-primary-content: #{on_accent}; --color-error: #{error};
+        }
+        """
+
+      nil ->
+        ""
+    end
+  end
+
   def root(assigns) do
+    look = assigns.conn.params["sumi"]
+    look = if List.keymember?(@sumi_themes, look, 0), do: look
+
     # A controller's assigns have no change tracking: put, not assign.
-    assigns = Map.put(assigns, :sumi, assigns.conn.params["theme"] == "sumi")
+    assigns =
+      Map.merge(assigns, %{
+        sumi: assigns.conn.params["theme"] == "sumi" or look != nil,
+        look: look,
+        themes: @sumi_themes
+      })
 
     ~H"""
     <!DOCTYPE html>
-    <html lang="en" data-theme={@conn.params["dark"] && "dark"}>
+    <html lang="en" data-theme={@look || (@conn.params["dark"] && "dark")}>
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -226,11 +277,15 @@ defmodule ErabiDev.Layouts do
         <title>Erabi development</title>
         <link rel="stylesheet" href="/assets/erabi.css" />
         <link :if={@sumi} rel="stylesheet" href="/assets/erabi-sumi.css" />
+        {@look && Phoenix.HTML.raw("<style>" <> sumi_style(@look) <> "</style>")}
         <style>
           body { font-family: system-ui, sans-serif; margin: 0; background: var(--erabi-background); color: var(--erabi-text); }
           body.sumi { font-family: var(--erabi-font); }
           main { max-width: 52rem; margin: 0 auto; padding: 2rem 1rem 6rem; }
           nav a { margin-right: 1rem; color: inherit; }
+          nav a[aria-current] { font-weight: 600; }
+          nav.sumi-themes { display: flex; flex-wrap: wrap; margin-top: 0.25rem; }
+          nav.sumi-themes span { margin-right: 0.5rem; }
           h1 { font-size: 1.5rem; margin: 1.5rem 0 0.25rem; }
           .lede { color: var(--erabi-muted); margin: 0 0 1.5rem; }
           .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 1.25rem 1.5rem; }
@@ -275,6 +330,9 @@ defmodule ErabiDev.Layouts do
         <main>
           <nav>
             <a href="/">Pickers</a><a href="/choosing">Choosing together</a><a href="/plain">Without LiveView</a><a href="/?theme=sumi">Sumi</a><a href="/?dark=1">Dark</a><a href="/?locale=pt-PT">pt-PT</a>
+          </nav>
+          <nav class="sumi-themes" aria-label="Sumi's themes">
+            <span>Sumi:</span><a :for={{id, name, _, _, _, _, _, _, _, _} <- @themes} href={"?sumi=#{id}"} aria-current={@look == id && "page"}>{name}</a>
           </nav>
           {@inner_content}
         </main>

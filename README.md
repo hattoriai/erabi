@@ -133,7 +133,8 @@ plug Plug.Static, at: "/erabi/emoji", from: {:erabi, "priv/emoji"}, gzip: true
 
 Import the style sheet in `assets/css/app.css` (and the Sumi theme, if you
 want it: Sumi is the design system of Hattori AI, the makers of Erabi,
-Koyomi, Masu, Kotoba and Jumon). Put these lines below the other `@import`
+Koyomi, Masu, Kotoba and Jumon; it follows Sumi's seven themes and their
+accents). Put these lines below the other `@import`
 lines of `app.css`:
 
 ```css
