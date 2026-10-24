@@ -16,6 +16,9 @@ and Erabi follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- A picker given an `id` (and no `field`) gave its `<select>` the same id:
+  two elements of one id. The `<select>` is `<id>_input` now.
+
 - The Sumi theme gave Sumi's dark themes other than Ink (Smoke, Stone,
   Lacquer) the light palette and the light option colors, and Sumi's
   light themes other than Paper (Snow, Silk) the dark palette on a system

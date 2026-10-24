@@ -357,7 +357,7 @@ defmodule Erabi.Components do
       assigns.name || (field && field.name) ||
         raise ArgumentError, "Erabi: a picker needs a `field` or a `name`"
 
-    input_id = (field && field.id) || assigns.id || base
+    input_id = input_id(field, assigns.id, base)
 
     %{
       id: assigns.id || input_id <> "_picker",
@@ -365,6 +365,12 @@ defmodule Erabi.Components do
       name: if(multiple, do: base <> "[]", else: base)
     }
   end
+
+  # The `<select>`'s id: the field's; else, beside a picker's own `id`
+  # (the element's), another, or a page would have two elements of one id.
+  defp input_id(%{id: id}, _picker_id, _base), do: id
+  defp input_id(nil, nil, base), do: base
+  defp input_id(nil, picker_id, _base), do: picker_id <> "_input"
 
   defp label(%{label: nil, label_id: nil, field: %{field: field}}),
     do: Phoenix.Naming.humanize(field)

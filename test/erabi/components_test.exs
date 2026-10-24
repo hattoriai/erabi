@@ -29,6 +29,20 @@ defmodule Erabi.ComponentsTest do
     JSON.decode!(json)
   end
 
+  test "a picker's id is the picker's, and its select has an id of its own" do
+    assigns = %{}
+
+    html =
+      rendered_to_string(~H"""
+      <.combobox id="repo-search" name="repository" options={["narabe", "masu"]} />
+      """)
+
+    doc = LazyHTML.from_fragment(html)
+    assert 1 == count(doc, ~s(div#repo-search[phx-hook="Erabi"]))
+    assert 1 == count(doc, ~s(select#repo-search_input[name="repository"]))
+    assert 1 == count(doc, "#repo-search")
+  end
+
   test "a select is a native select of its options until the hook mounts" do
     assigns = %{form: task_form(%{"status" => "doing"})}
 
