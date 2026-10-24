@@ -7,6 +7,21 @@ and Erabi follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- The Sumi theme follows Sumi's seven themes and their accents: an
+  option color of the accent's hue is another in that theme, at the same
+  contrast, so that a chip does not look selected. `mix dev` shows each
+  (`?sumi=smoke`). See the Theming guide.
+
+### Fixed
+
+- The Sumi theme gave Sumi's dark themes other than Ink (Smoke, Stone,
+  Lacquer) the light palette and the light option colors, and Sumi's
+  light themes other than Paper (Snow, Silk) the dark palette on a system
+  in dark mode; on a system in dark mode, without a theme, the option
+  colors stayed light.
+
 ## [0.1.0] - Unreleased
 
 ### Added

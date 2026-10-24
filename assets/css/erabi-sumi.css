@@ -14,8 +14,14 @@
  *   3. the Sumi palette below, so that the pickers look like Sumi on a page
  *      with no Sumi tokens.
  *
- * The option colours stay erabi.css's: each pair is checked for contrast,
- * and they read the same on Sumi's paper.
+ * Dark and light: Sumi's seven themes, by the data-theme attribute ("dark",
+ * "smoke", "stone" and "lacquer" are dark; "light", "snow" and "silk"
+ * light), then prefers-color-scheme.
+ *
+ * The option colours are erabi.css's pairs, each checked for contrast.
+ * Each Sumi theme has its own accent, which marks the selection: an option
+ * colour of the accent's hue is another in that theme, below, so that a
+ * chip does not look selected.
  */
 
 /* The Sumi palette, light. */
@@ -29,9 +35,12 @@
   --erabi-sumi-error: oklch(55% 0.22 25);
 }
 
-/* The Sumi palette, dark: data-theme="dark", or a dark preference on a page
-   that does not ask for light. */
-[data-theme="dark"] {
+/* The Sumi palette, dark: Sumi's dark themes (Ink, Smoke, Stone, Lacquer),
+   or a dark preference on a page that does not ask for a light one. */
+[data-theme="dark"],
+[data-theme="smoke"],
+[data-theme="stone"],
+[data-theme="lacquer"] {
   --erabi-sumi-base-100: oklch(12% 0.003 270);
   --erabi-sumi-base-200: oklch(16% 0.004 270);
   --erabi-sumi-base-300: oklch(20% 0.005 270);
@@ -41,7 +50,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
+  :root:not([data-theme="light"], [data-theme="snow"], [data-theme="silk"]) {
     --erabi-sumi-base-100: oklch(12% 0.003 270);
     --erabi-sumi-base-200: oklch(16% 0.004 270);
     --erabi-sumi-base-300: oklch(20% 0.005 270);
@@ -49,6 +58,102 @@
     --erabi-sumi-muted: oklch(95% 0.012 85 / 0.5);
     --erabi-sumi-error: oklch(58% 0.22 25);
   }
+}
+
+/* The option colours on Sumi's dark themes: erabi.css gives its dark pairs
+   to data-theme="dark" only. No specificity, as there, so that an app's
+   own win. */
+:where([data-theme="smoke"], [data-theme="stone"], [data-theme="lacquer"]) {
+  --erabi-gray-surface: #313336;
+  --erabi-gray-text: #d8dbdf;
+  --erabi-brown-surface: #3f2f24;
+  --erabi-brown-text: #edd6c7;
+  --erabi-orange-surface: #4e270d;
+  --erabi-orange-text: #ffcdae;
+  --erabi-yellow-surface: #413000;
+  --erabi-yellow-text: #eed9a5;
+  --erabi-green-surface: #193b22;
+  --erabi-green-text: #bde8c4;
+  --erabi-blue-surface: #1a3453;
+  --erabi-blue-text: #bbdeff;
+  --erabi-purple-surface: #3b294f;
+  --erabi-purple-text: #e6cfff;
+  --erabi-pink-surface: #4b2437;
+  --erabi-pink-text: #ffc8e1;
+  --erabi-red-surface: #53211f;
+  --erabi-red-text: #ffc6bf;
+}
+
+@media (prefers-color-scheme: dark) {
+  :where(:root:not([data-theme="light"], [data-theme="snow"], [data-theme="silk"])) {
+    --erabi-gray-surface: #313336;
+    --erabi-gray-text: #d8dbdf;
+    --erabi-brown-surface: #3f2f24;
+    --erabi-brown-text: #edd6c7;
+    --erabi-orange-surface: #4e270d;
+    --erabi-orange-text: #ffcdae;
+    --erabi-yellow-surface: #413000;
+    --erabi-yellow-text: #eed9a5;
+    --erabi-green-surface: #193b22;
+    --erabi-green-text: #bde8c4;
+    --erabi-blue-surface: #1a3453;
+    --erabi-blue-text: #bbdeff;
+    --erabi-purple-surface: #3b294f;
+    --erabi-purple-text: #e6cfff;
+    --erabi-pink-surface: #4b2437;
+    --erabi-pink-text: #ffc8e1;
+    --erabi-red-surface: #53211f;
+    --erabi-red-text: #ffc6bf;
+  }
+}
+
+/* An option colour of the accent's hue is another, in that theme only, at
+   the contrast of the pair it replaces (6.8:1 and more).
+   Ink and Paper (blade, a red orange): orange is amber, red a crimson. */
+:where([data-theme="dark"]) {
+  --erabi-orange-surface: oklch(32% 0.069 66);
+  --erabi-orange-text: oklch(88.4% 0.07 68);
+  --erabi-red-surface: oklch(32% 0.075 10);
+  --erabi-red-text: oklch(87.5% 0.066 10);
+}
+
+:where([data-theme="light"]) {
+  --erabi-orange-surface: oklch(93.4% 0.041 70);
+  --erabi-orange-text: oklch(42% 0.095 64);
+  --erabi-red-surface: oklch(92.7% 0.037 10);
+  --erabi-red-text: oklch(42% 0.15 10);
+}
+
+/* Smoke (jade): green is a leaf green. */
+:where([data-theme="smoke"]) {
+  --erabi-green-surface: oklch(31.9% 0.06 135);
+  --erabi-green-text: oklch(89.1% 0.066 135);
+}
+
+/* Stone (gold): yellow is lemon. */
+:where([data-theme="stone"]) {
+  --erabi-yellow-surface: oklch(32% 0.065 105);
+  --erabi-yellow-text: oklch(89% 0.071 105);
+}
+
+/* Lacquer (vermilion): red is a crimson, and pink, beside it, a magenta. */
+:where([data-theme="lacquer"]) {
+  --erabi-red-surface: oklch(32% 0.075 5);
+  --erabi-red-text: oklch(87.5% 0.066 5);
+  --erabi-pink-surface: oklch(32% 0.064 336);
+  --erabi-pink-text: oklch(88.8% 0.07 336);
+}
+
+/* Snow (indigo): blue is azure. */
+:where([data-theme="snow"]) {
+  --erabi-blue-surface: oklch(93.5% 0.034 228);
+  --erabi-blue-text: oklch(40% 0.08 232);
+}
+
+/* Silk (lotus pink): pink is orchid. */
+:where([data-theme="silk"]) {
+  --erabi-pink-surface: oklch(93.5% 0.041 334);
+  --erabi-pink-text: oklch(42.1% 0.13 334);
 }
 
 /* The mapping. */

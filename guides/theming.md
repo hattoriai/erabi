@@ -46,6 +46,25 @@ more).
 tokens of the page (its daisyUI themes, or the short `--sumi-*` names),
 or to Sumi's own palette when the page has none.
 
+Each of Sumi's seven themes (Ink, Smoke, Stone and Lacquer; Paper, Snow
+and Silk) has its own accent, which marks the selection, and the pickers
+follow it:
+
+* the dark themes have the dark palette, and the dark pairs of the
+  option colors; the light themes stay light on a system in dark mode;
+* an option color of the accent's hue is another in that theme, at the
+  contrast of the pair it replaces, so that a chip does not look
+  selected: on Ink and Paper (blade) orange is amber and red a crimson;
+  on Smoke (jade) green a leaf green; on Stone (gold) yellow lemon; on
+  Lacquer (vermilion) red a crimson and pink a magenta; on Snow (indigo)
+  blue azure; on Silk (lotus pink) pink orchid.
+
+The invalid color is Sumi's error, as on the page's other fields, and
+the colors of people choosing are Issho's (`issho-sumi.css`).
+
+The development app (`mix dev`) shows each: `?sumi=smoke`, or the links
+under its menu.
+
 ## Touch
 
 On a coarse pointer, fields and rows are taller (2.75rem). On a phone,
