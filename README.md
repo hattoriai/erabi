@@ -2,6 +2,18 @@
 
 ![Erabi — Pickers for Phoenix](https://raw.githubusercontent.com/hattoriai/erabi/main/media/banner.png)
 
+<p>
+  <a href="https://hex.pm/packages/erabi">
+    <img alt="Hex Version" src="https://img.shields.io/hexpm/v/erabi.svg">
+  </a>
+  <a href="https://hexdocs.pm/erabi">
+    <img src="https://img.shields.io/badge/docs-hexdocs-blue" alt="HexDocs">
+  </a>
+  <a href="https://github.com/hattoriai/erabi/actions">
+    <img alt="CI Status" src="https://github.com/hattoriai/erabi/actions/workflows/ci.yml/badge.svg">
+  </a>
+</p>
+
 Erabi (選び, "choosing") is pickers for Phoenix LiveView: the counterpart
 to [Koyomi](https://hex.pm/packages/koyomi) for everything that is not a
 date. It gives your app:
