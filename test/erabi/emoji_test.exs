@@ -77,6 +77,27 @@ defmodule Erabi.EmojiTest do
     assert html =~ ~s(<template data-erabi-icon="rocket">)
   end
 
+  test "an emoji picker's tabs and buttons of the app's own, hidden for its script to move" do
+    assigns = %{}
+
+    html =
+      rendered_to_string(~H"""
+      <.emoji_picker name="icon" value="">
+        <:tab label="Upload"><label for="file">Upload an image</label></:tab>
+        <:action><button type="button" phx-click="remove">Remove</button></:action>
+      </.emoji_picker>
+      """)
+
+    assert html =~ ~s(<div data-part="tab" data-label="Upload" hidden>)
+    assert html =~ ~s(<label for="file">Upload an image</label>)
+    assert html =~ ~s(<div data-part="actions" hidden>)
+    assert html =~ ~s(phx-click="remove")
+
+    plain = rendered_to_string(~H|<.emoji_picker name="icon" value="" />|)
+    refute plain =~ "data-part=\"tab\""
+    refute plain =~ "data-part=\"actions\""
+  end
+
   test "the changeset takes emoji, their tones and the app's icons, and nothing else" do
     types = %{icon: :string}
     options = Erabi.Emoji.options([%{value: "rocket", label: "Rocket", icon: "rocket"}])

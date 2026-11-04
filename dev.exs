@@ -425,6 +425,14 @@ defmodule ErabiDev.PickersLive do
           <label class="label" id="page-icon-label">Page icon (emoji, or an icon)</label>
           <.emoji_picker field={@form[:page_icon]} options={Data.icons()} label_id="page-icon-label" locale={@locale}>
             <:icon :let={name}><.lucide name={name} /></:icon>
+            <%!-- The app's own tab, as Notion's Upload, and its Remove. --%>
+            <:tab label="Upload">
+              <label for="page-icon-file" class="upload-label">Upload an image</label>
+              <button type="button" id="page-icon-link" phx-click="picked" value="from the tab">Use a link</button>
+            </:tab>
+            <:action>
+              <button type="button" id="page-icon-remove" phx-click="picked" value="removed">Remove</button>
+            </:action>
           </.emoji_picker>
         </div>
         <div>
@@ -445,6 +453,8 @@ defmodule ErabiDev.PickersLive do
       <.select name="view" value="board" options={[{"Board", "board"}, {"List", "list"}, {"Calendar", "calendar"}]} label="View" on_change="picked" />
     </div>
     <p>Picked: <span id="picked">{inspect(@picked)}</span></p>
+    <%!-- The page icon's file: its Upload tab's label opens it. --%>
+    <input type="file" id="page-icon-file" accept="image/*" hidden />
     <h2>Posted</h2>
     <pre id="posted" data-json={JSON.encode!(@posted)}>{JSON.encode!(@posted)}</pre>
     """

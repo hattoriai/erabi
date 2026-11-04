@@ -201,7 +201,13 @@ export class EmojiPicker implements AnyPicker {
   private serverValue: string;
   private data: EmojiData | null = null;
   private failed = false;
-  private tab: "emoji" | "icons";
+  // "emoji", "icons", or an app's tab ("tab-0"…, from the `:tab` slot).
+  private tab: string;
+  private order: string[] = [];
+  private panels = new Map<string, HTMLElement>();
+  private searchBox!: HTMLElement;
+  private actions: HTMLElement | null = null;
+  private body!: HTMLElement;
   private tone: number = stored(TONE_KEY, 0);
   private cells: Cell[] = [];
   private active = -1;
@@ -307,17 +313,43 @@ export class EmojiPicker implements AnyPicker {
       spellcheck: "false",
     });
     const search = el("div", { class: "erabi-filter-box" }, icon("search"), this.input);
+    this.searchBox = search;
     const head = el("div", { class: "erabi-emoji-head" });
-    if (this.hasEmoji && this.icons.length > 0) {
+    // The tabs: Emoji, the app's icons, and the app's own (the `:tab` slot);
+    // the app's buttons (the `:action` slot) beside them.
+    const own = Array.from(this.el.querySelectorAll<HTMLElement>(':scope > [data-part="tab"]'));
+    const tabs: [string, string][] = [];
+    if (this.hasEmoji) tabs.push(["emoji", this.words.t("emoji")]);
+    if (!this.hasEmoji || this.icons.length > 0) tabs.push(["icons", this.words.t("icons")]);
+    own.forEach((panel, index) => {
+      const tab = `tab-${index}`;
+      tabs.push([tab, panel.dataset.label ?? ""]);
+      panel.hidden = true;
+      panel.classList.add("erabi-tab-panel");
+      panel.id = `${this.id}-panel-${index}`;
+      panel.setAttribute("role", "tabpanel");
+      panel.setAttribute("aria-label", panel.dataset.label ?? "");
+      this.panels.set(tab, panel);
+    });
+    this.order = tabs.map(([tab]) => tab);
+    if (tabs.length > 1) {
       this.tabs = el("div", { class: "erabi-tabs", role: "tablist" });
-      for (const [tab, word] of [
-        ["emoji", "emoji"],
-        ["icons", "icons"],
-      ] as const) {
-        const button = el("button", { type: "button", role: "tab", class: "erabi-tab", "data-tab": tab, "aria-selected": String(tab === this.tab), tabindex: tab === this.tab ? "0" : "-1" }, this.words.t(word));
+      for (const [tab, word] of tabs) {
+        const panel = this.panels.get(tab);
+        const button = el("button", { type: "button", role: "tab", class: "erabi-tab", "data-tab": tab, "aria-selected": String(tab === this.tab), "aria-controls": panel ? panel.id : null, tabindex: tab === this.tab ? "0" : "-1" }, word);
         this.tabs.append(button);
       }
-      head.append(this.tabs);
+    }
+    this.actions = this.el.querySelector<HTMLElement>(':scope > [data-part="actions"]');
+    if (this.tabs || this.actions) {
+      const bar = el("div", { class: "erabi-tab-bar" });
+      if (this.tabs) bar.append(this.tabs);
+      if (this.actions) {
+        this.actions.hidden = false;
+        this.actions.classList.add("erabi-actions");
+        bar.append(this.actions);
+      }
+      head.append(bar);
     }
     head.append(search);
     if (this.hasEmoji && !config.noTones) {
@@ -330,7 +362,7 @@ export class EmojiPicker implements AnyPicker {
     this.nav = el("div", { class: "erabi-emoji-nav", role: "toolbar", "aria-label": this.words.t("categories") });
     this.list = el("div", { id: listId, class: "erabi-emoji-list", role: "listbox", "aria-label": config.label ?? this.words.t("emoji") });
     this.preview = el("div", { class: "erabi-emoji-preview", "aria-hidden": "true" });
-    const body = el("div", { id: `${this.id}-dialog`, class: "erabi-popup-body erabi-emoji-popup", role: "dialog", "aria-label": config.label ?? this.words.t("emoji") }, head, this.nav, this.list, this.preview);
+    const body = this.body = el("div", { id: `${this.id}-dialog`, class: "erabi-popup-body erabi-emoji-popup", role: "dialog", "aria-label": config.label ?? this.words.t("emoji") }, head, this.nav, this.list, ...this.panels.values(), this.preview);
     this.popup = new internal.Popup(this.field, body, () => this.close(false), { width: 352, maxHeight: 460, ...internal.sheetOf(config, this.words) });
 
     this.live = el("div", { class: "erabi-live", "aria-live": "polite", "aria-atomic": "true" });
@@ -390,16 +422,36 @@ export class EmojiPicker implements AnyPicker {
       on(this.tabs, "click", (event) => {
         const button = (event.target as Element).closest<HTMLElement>("[data-tab]");
         if (button) {
-          this.switchTab(button.dataset.tab as "emoji" | "icons");
-          this.input.focus();
+          this.switchTab(button.dataset.tab!);
+          if (this.panels.has(this.tab)) button.focus();
+          else this.input.focus();
         }
       });
       on(this.tabs, "keydown", (event) => {
         if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
           event.preventDefault();
-          this.switchTab(this.tab === "emoji" ? "icons" : "emoji");
+          const step = event.key === "ArrowRight" ? 1 : -1;
+          const index = this.order.indexOf(this.tab);
+          this.switchTab(this.order[(index + step + this.order.length) % this.order.length]!);
           this.tabs!.querySelector<HTMLElement>('[aria-selected="true"]')?.focus();
         }
+      });
+    }
+    // A press in the popup keeps the focus in the picker, so that the popup
+    // stays for the click: Safari does not focus a button on a press, and
+    // the focus would leave (and close it) before the click. So a tab, a
+    // tone, an action (Remove) and an app's tab's label (which opens its
+    // file input) get their click. A field that people type in (the
+    // search, an app's) takes the focus.
+    on(this.body, "pointerdown", (event) => {
+      const target = event.target as Element;
+      const typed = target.closest("textarea, select, [contenteditable]") ?? target.closest("input:not([type=button]):not([type=submit]):not([type=checkbox]):not([type=radio]):not([type=file])");
+      if (!typed) event.preventDefault();
+    });
+    // An app's button (Remove) does its work, through the LiveView, and the popup closes.
+    if (this.actions) {
+      on(this.actions, "click", (event) => {
+        if ((event.target as Element).closest("button, a, [role=button]")) queueMicrotask(() => this.close(true));
       });
     }
     if (this.toneButton && this.toneMenu) {
@@ -441,6 +493,8 @@ export class EmojiPicker implements AnyPicker {
 
   open(): void {
     if (this.inactive || this.popup.open) return;
+    // It opens on its first tab: the emoji, or the icons.
+    if (this.panels.has(this.tab)) this.switchTab(this.order[0]!);
     this.input.value = this.query = "";
     this.popup.show();
     this.field.setAttribute("aria-expanded", "true");
@@ -490,13 +544,25 @@ export class EmojiPicker implements AnyPicker {
 
   // -- The grid -----------------------------------------------------------
 
-  private switchTab(tab: "emoji" | "icons"): void {
+  private switchTab(tab: string): void {
     if (tab === this.tab) return;
     this.tab = tab;
     for (const button of this.tabs?.querySelectorAll<HTMLElement>("[data-tab]") ?? []) {
       const selected = button.dataset.tab === tab;
       button.setAttribute("aria-selected", String(selected));
       button.tabIndex = selected ? 0 : -1;
+    }
+    // An app's tab is its own content: no search, grid or preview.
+    const own = this.panels.has(tab);
+    for (const [key, panel] of this.panels) panel.hidden = key !== tab;
+    this.searchBox.hidden = own;
+    this.list.hidden = own;
+    this.preview.hidden = own;
+    if (own) {
+      this.nav.hidden = true;
+      if (this.toneButton) this.toneButton.hidden = true;
+      this.toggleTones(false);
+      return;
     }
     this.input.placeholder = this.words.t(tab === "emoji" ? "searchEmoji" : "search");
     this.input.setAttribute("aria-label", this.input.placeholder);

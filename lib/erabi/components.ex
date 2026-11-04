@@ -155,6 +155,21 @@ defmodule Erabi.Components do
         <:icon :let={name}><.lucide name={name} /></:icon>
       </.emoji_picker>
 
+  A `:tab` is a tab of the app's own after them, as Notion's Upload, and
+  an `:action` a button at the top of the popup, as its Remove. Both are
+  rendered once, as the picker mounts (it is `phx-update="ignore"`), and
+  their `phx-click` go to the LiveView. A `<label for>` in a tab opens the
+  app's file input, which stays outside the picker. A click on an action
+  closes the popup.
+
+      <.emoji_picker field={@form[:icon]} options={@icons}>
+        <:icon :let={name}><.lucide name={name} /></:icon>
+        <:tab label="Upload">
+          <label for={@uploads.icon.ref}>Upload an image</label>
+        </:tab>
+        <:action><button type="button" phx-click="remove_icon">Remove</button></:action>
+      </.emoji_picker>
+
   The emoji are a file of the page's language, which the picker fetches
   as it first opens: serve them as `Erabi.Emoji` says. Check the value
   with `Erabi.Emoji.options/1`. The picker is in its own entry:
@@ -242,6 +257,9 @@ defmodule Erabi.Components do
         <% end %>
       </select>
       <template :for={name <- @icons} data-erabi-icon={name}>{render_slot(@icon, name)}</template>
+      <%!-- The app's tabs and buttons: the picker moves them into its popup. --%>
+      <div :for={tab <- @tab} data-part="tab" data-label={tab.label} hidden>{render_slot(tab)}</div>
+      <div :if={@action != []} data-part="actions" hidden>{render_slot(@action)}</div>
     </div>
     <.live_component
       :if={@issho_join}

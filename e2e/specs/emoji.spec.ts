@@ -99,4 +99,53 @@ test.describe("emoji", () => {
     await expect(icon).toHaveAttribute("aria-expanded", "false");
     await expect(icon).toBeFocused();
   });
+  // Notion's page icon: Emoji, Icons, and the app's Upload; Remove at the top.
+  test("an app's tab shows its own content in place of the grid; its buttons and an action go to the LiveView", async ({ page }) => {
+    await openPage(page);
+    const popup = picker(page, "task_page_icon_picker");
+    await field(page, "task_page_icon_picker").click();
+    const tabs = popup.getByRole("tablist");
+    await expect(tabs.getByRole("tab")).toHaveText(["Emoji", "Icons", "Upload"]);
+
+    // The Upload tab: its content, no search or grid.
+    await tabs.getByRole("tab", { name: "Upload" }).click();
+    const panel = popup.getByRole("tabpanel", { name: "Upload" });
+    await expect(panel).toBeVisible();
+    await expect(popup.getByRole("combobox", { name: "Search emoji…" })).toBeHidden();
+    await expect(popup.getByRole("listbox")).toBeHidden();
+
+    // Its label opens the app's file input, outside the picker.
+    const chooser = page.waitForEvent("filechooser");
+    await panel.getByText("Upload an image").click();
+    await chooser;
+
+    // The popup stays for it; its button goes to the LiveView.
+    await expect(panel).toBeVisible();
+    await panel.getByRole("button", { name: "Use a link" }).click();
+    await expect(page.locator("#picked")).toHaveText('"from the tab"');
+
+    // The keys go from tab to tab, round.
+    await tabs.getByRole("tab", { name: "Upload" }).focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(tabs.getByRole("tab", { name: "Emoji" })).toHaveAttribute("aria-selected", "true");
+    await expect(popup.getByRole("combobox", { name: "Search emoji…" })).toBeVisible();
+    await page.keyboard.press("ArrowLeft");
+    await expect(tabs.getByRole("tab", { name: "Upload" })).toHaveAttribute("aria-selected", "true");
+
+    // Closed and opened again, it is on its first tab.
+    await page.keyboard.press("Escape");
+    await field(page, "task_page_icon_picker").click();
+    await expect(tabs.getByRole("tab", { name: "Emoji" })).toHaveAttribute("aria-selected", "true");
+
+    // An action goes to the LiveView, and closes the popup.
+    await popup.getByRole("button", { name: "Remove" }).click();
+    await expect(page.locator("#picked")).toHaveText('"removed"');
+    await expect(popup.locator(".erabi-emoji-popup")).toBeHidden();
+  });
+
+  test("a picker of icons alone, with no tab of the app's, has no tabs", async ({ page }) => {
+    await openPage(page);
+    await field(page, "task_section_icon_picker").click();
+    await expect(picker(page, "task_section_icon_picker").getByRole("tablist")).toHaveCount(0);
+  });
 });
