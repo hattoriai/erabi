@@ -168,6 +168,9 @@ is a button at the top of the popup:
 * Both are rendered once, as the picker mounts: the picker is
   `phx-update="ignore"`, so what LiveView patches later does not reach
   them. Give the picker a new `id` when they must change.
+* Write them in plain HTML. When the picker mounts again with a new
+  `id`, LiveView sends a function component it sent before as an empty
+  element (`data-phx-skip`), which it cannot fill inside the picker.
 * Their `phx-click` go to the LiveView as anywhere else.
 * A `<label for>` opens your file input, which stays outside the picker:
   the upload is LiveView's, as usual.
