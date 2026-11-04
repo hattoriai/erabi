@@ -7,6 +7,25 @@ and Erabi follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-04
+
+### Added
+
+- An emoji or icon picker takes tabs and buttons of the app's own, as
+  Notion's page icon has Upload and Remove: a `:tab` (with its `label`)
+  is a tab after Emoji and Icons, its HEEx in place of the search and the
+  grid, and an `:action` a button at the top of the popup, which closes it
+  when clicked. Their `phx-click` go to the LiveView, and a `<label for>`
+  in a tab opens the app's file input. See "Tabs and buttons of your own"
+  in the Pickers guide.
+
+### Fixed
+
+- In Safari, a press on a button of the emoji picker's popup (a skin
+  tone) took the focus out of the picker, which closed the popup before
+  the click: the click was lost. A press in the popup keeps the focus in
+  the picker, except in a field that people type in.
+
 ## [0.2.0] - 2026-10-24
 
 ### Added

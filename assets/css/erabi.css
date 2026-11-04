@@ -1011,6 +1011,59 @@
   gap: 0.25rem;
 }
 
+/* The tabs, and the app's buttons (the `:action` slot) at their end. */
+.erabi-tab-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.erabi-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+.erabi-actions button,
+.erabi-actions a {
+  padding: 0.25rem 0.5rem;
+  border: 0;
+  border-radius: var(--erabi-inner-radius);
+  background: transparent;
+  color: var(--erabi-muted);
+  font: inherit;
+  font-size: var(--erabi-small);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.erabi-actions button:hover,
+.erabi-actions a:hover {
+  background: var(--erabi-active);
+  color: var(--erabi-text);
+}
+
+.erabi-actions button:focus-visible,
+.erabi-actions a:focus-visible {
+  outline: none;
+  box-shadow: var(--erabi-focus-ring);
+}
+
+/* An app's tab (the `:tab` slot): its own content, in the grid's place. */
+.erabi-tab-panel {
+  padding: 0.75rem;
+  min-height: 12rem;
+  overflow: auto;
+}
+
+.erabi-tab-panel[hidden],
+.erabi-emoji-head .erabi-filter-box[hidden],
+.erabi-emoji-list[hidden],
+.erabi-emoji-preview[hidden] {
+  display: none;
+}
+
 .erabi-tab {
   padding: 0.25rem 0.625rem;
   border: 0;

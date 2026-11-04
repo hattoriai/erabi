@@ -106,6 +106,16 @@ defmodule Erabi.Components.Shared do
           "attributes for the picker element, such as `phx-target`; `aria-describedby` goes to the field"
 
       slot :icon, doc: "draws an option's `:icon`, given its name (`:let={name}`)"
+
+      slot :tab,
+        doc:
+          "an emoji or icon picker's tab of the app's own, after Emoji and Icons (an upload, say): its HEEx, rendered once" do
+        attr :label, :string, required: true, doc: "the tab's name"
+      end
+
+      slot :action,
+        doc:
+          "an emoji or icon picker's buttons at the top of its popup (Remove, say), rendered once: a click on one closes the popup"
     end
   end
 end

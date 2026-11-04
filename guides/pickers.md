@@ -144,6 +144,39 @@ categories; Enter takes the emoji; Escape clears the search, then closes.
 The emoji and icon pickers are an entry of their own, which the app
 imports with the hook (`import "erabi/emoji"`).
 
+### Tabs and buttons of your own
+
+Notion's page icon has three tabs, Emoji, Icons and Upload, and a Remove
+button at the top. A `:tab` is a tab of your own after Emoji and Icons,
+with your content in place of the search and the grid, and an `:action`
+is a button at the top of the popup:
+
+```heex
+<.emoji_picker id="page-icon" name="icon" value={@page.icon} options={@icons}>
+  <:icon :let={name}><.icon name={name} /></:icon>
+  <:tab label="Upload">
+    <label for={@uploads.icon.ref}>Upload an image</label>
+  </:tab>
+  <:action><button type="button" phx-click="remove_icon">Remove</button></:action>
+</.emoji_picker>
+
+<form id="page-icon-upload" phx-change="validate_icon">
+  <.live_file_input upload={@uploads.icon} class="sr-only" />
+</form>
+```
+
+* Both are rendered once, as the picker mounts: the picker is
+  `phx-update="ignore"`, so what LiveView patches later does not reach
+  them. Give the picker a new `id` when they must change.
+* Their `phx-click` go to the LiveView as anywhere else.
+* A `<label for>` opens your file input, which stays outside the picker:
+  the upload is LiveView's, as usual.
+* A click on an action closes the popup. The popup opens on its first
+  tab again.
+* The arrows go from tab to tab. A press in the popup keeps the focus in
+  the picker, so that the popup stays for the click, except in a field
+  that people type in.
+
 ## `icon_picker`
 
 One of your icons: the `options` that have an `:icon`, in a grid, with a
